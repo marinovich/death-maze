@@ -1,0 +1,61 @@
+
+(function() {
+    function Sprite(url, pos, size, updateSpeed, frames, dir, once, startPos, speed, moveType) {
+        this.pos = pos;
+        this.size = size;
+        this.updateSpeed = typeof updateSpeed === 'number' ? updateSpeed : 0;
+        this.frames = frames;
+        this._index = 0;
+        this.url = url;
+        this.dir = dir || 'horizontal';
+        this.once = once;
+        this.startPos = startPos;
+        this.speed = speed || 100;
+        this.moveType = moveType || "linear";
+        this.endPos = startPos;
+    };
+
+    Sprite.prototype = {
+
+        update: function(dt) {
+            this._index += this.updateSpeed*dt;
+        },
+
+        render: function(ctx) {
+            var frame;
+
+            if(this.updateSpeed > 0) {
+                var max = this.frames.length;
+                var idx = Math.floor(this._index);
+                frame = this.frames[idx % max];
+
+                if(this.once && idx >= max) {
+                    this.done = true;
+                    return;
+                }
+            }
+            else {
+                frame = 0;
+            }
+
+
+            var x = this.pos[0];
+            var y = this.pos[1];
+
+            if(this.dir == 'vertical') {
+                y += frame * this.size[1];
+            }
+            else {
+                x += frame * this.size[0];
+            }
+
+            ctx.drawImage(resources.get(this.url),
+                          x, y,
+                          this.size[0], this.size[1],
+                          0, 0,
+                          this.size[0], this.size[1]);
+        }
+    };
+
+    window.Sprite = Sprite;
+})();
