@@ -42,7 +42,7 @@ gameField.style.height = `${canvas.height + timeBlockHeight + statusBarHeight + 
 let armyUnit = [armyUnit1, armyUnit2, armyUnit3, armyUnit4];
 let selectedUnit = 0;
 armyUnit[selectedUnit].style.opacity = '1';
-let totalGold = 0;
+let totalGold = 100;
 let goldMulti = 1;
 
 document.onkeypress = function(e) {
@@ -782,6 +782,14 @@ function reset() {
     enemies = [];
     bullets = [];
     rockets = [];
+
+    bulletSpeed = 500;
+    initBulletDamage = 1;
+    bulletFrequency = 300;
+
+    rocketSpeed = 150;
+    initRocketDamage = 10;
+    rocketFrequency = 1500;
 
     player.pos = [canvas.width/2-20, canvas.height / matrixHeight+1];
     exhaustLeft.pos = [player.pos[0], player.pos[1]-20];
