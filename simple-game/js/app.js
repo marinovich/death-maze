@@ -1,8 +1,5 @@
-
-// A cross-browser requestAnimationFrame
-// See https://hacks.mozilla.org/2011/08/animating-with-javascript-from-setinterval-to-requestanimationframe/
 const requestAnimFrame = (function(){
-    return window.requestAnimationFrame       ||
+    return window.requestAnimationFrame    ||
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame    ||
         window.oRequestAnimationFrame      ||
@@ -12,45 +9,140 @@ const requestAnimFrame = (function(){
         };
 })();
 
-// Create the canvas
-const canvas = document.createElement("canvas");
+const gameField = document.getElementById("game-field");
+const armyWrap = document.getElementById("army-wrap");
+const armyUnit1 = document.getElementById("unit1");
+const armyUnit2 = document.getElementById("unit2");
+const armyUnit3 = document.getElementById("unit3");
+const armyUnit4 = document.getElementById("unit4");
+const timeBlock = document.getElementById("time-block");
+const statusBar = document.getElementById("status-bar");
+
+const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-canvas.onselectstart = function () {return false} // do not select when clicking
-canvas.onmousedown = function () {return false}	  // do not select when clicking
+let hp = document.getElementById("hp");
+let hpCtx = hp.getContext("2d");
+
+let timeBlockHeight = 50;
+let armyWrapWidth = 70;
+let statusBarHeight = 40;
 
 canvas.width = 512;
 canvas.height = 480;
+hp.height = 15;
+hp.width = canvas.width + 4;
 
-document.body.appendChild(canvas);
+timeBlock.style.height = `${timeBlockHeight}px`;
+armyWrap.style.width = `${armyWrapWidth}px`;
+statusBar.style.height = `${statusBarHeight}px`; 
+gameField.style.width = `${canvas.width + armyWrapWidth + 8}px`;
+gameField.style.height = `${canvas.height + timeBlockHeight + statusBarHeight + hp.height + 4}px`;
 
-let matrixWidth = 10;
-let matrixHeight = 10;
+let armyUnit = [armyUnit1, armyUnit2, armyUnit3, armyUnit4];
+let selectedUnit = 0;
+armyUnit[selectedUnit].style.opacity = '1';
+let totalGold = 0;
+let goldMulti = 1;
+
+document.onkeypress = function(e) {
+	if (String.fromCharCode(e.keyCode || e.charCode) == 'v') { armyUnit[0].onclick(); }
+	if (String.fromCharCode(e.keyCode || e.charCode) == 'c') { armyUnit[1].onclick(); }
+	if (String.fromCharCode(e.keyCode || e.charCode) == 'x') { armyUnit[2].onclick(); }
+	if (String.fromCharCode(e.keyCode || e.charCode) == 'z') { armyUnit[3].onclick(); }
+};
+
+armyUnit.forEach((item,i) => item.onmouseover = () => (i !== selectedUnit) ? item.style.opacity = "0.5" : false);
+
+armyUnit.forEach((item,i) => item.onmouseleave = () => (i !== selectedUnit) ? item.style.opacity = "0.3" : false);
+
+armyUnit.forEach((item,i,arr) => item.onclick = () => 
+	arr.forEach(function (item,index) {
+		if (index !== i) 
+			item.style.opacity = "0.3";
+		else {
+			item.style.opacity = "1";
+			selectedUnit = index;
+		}
+	}));
+
+// hp bar
+// Black stroke
+	hpCtx.beginPath();
+	hpCtx.lineWidth = "4";
+	hpCtx.strokeStyle = "#0f0f0f";
+	hpCtx.rect(0, 0, hp.width, hp.height);  
+	hpCtx.stroke();
+
+let updateHP = function updateHP(percent) {
+	let hpPercent = percent || 100;
+	
+	if (hpPercent > 100) {
+		hpPercent = 100;
+	}
+	
+	if (hpPercent < 100 && hpPercent > 0) {
+
+		// Red rectangle
+	    hpCtx.beginPath();    
+	    hpCtx.lineWidth = "4";
+	    hpCtx.fillStyle = "red";
+	    hpCtx.fillRect(hp.width * hpPercent / 100, 2, hp.width - hp.width * hpPercent / 100 - 2, hp.height - 2);
+
+	    // Green rectangle
+	    hpCtx.beginPath();
+		hpCtx.lineWidth = "4";
+		hpCtx.fillStyle = "green";
+		hpCtx.fillRect(2, 2, hp.width * hpPercent / 100 - 2, hp.height - 2);
+	}
+
+	if (hpPercent === 100 || hpPercent === 0) {
+	    // Green rectangle
+	    hpCtx.beginPath();
+		hpCtx.lineWidth = "4";
+		if (hpPercent === 100)
+			hpCtx.fillStyle = "green";
+		else
+			hpCtx.fillStyle = "red";
+		hpCtx.fillRect(2, 2, hp.width - 4, hp.height - 2);
+	}
+}
+
+updateHP();
+
+document.onselectstart = function () {return false} // do not select when clicking
+canvas.onmousedown = function () {return false}	  // do not select when clicking
+
+let matrixWidth = 20;
+let matrixHeight = 30;
+let cellHeight = canvas.height / matrixHeight;
+let cellWidth = canvas.width / matrixWidth;
 let maxFreeTime = 9999; // maximum matrix[i][j].freeTime
 
 let matrix = new Array(matrixHeight);
-for(let i = 0; i < matrix.length; i++)
+for(let i = 0; i < matrixHeight; i++)
 	matrix[i] = new Array(matrixWidth);
-for (let i = 0; i < matrix.length; i++) 
-	for (let j = 0; j < matrix[i].length; j++)
-		matrix[i][j] = {startPos: [j*canvas.width/matrix[i].length, i*canvas.height/matrix.length],
-						endPos: [(j+1)*canvas.width/matrix[i].length, (i+1)*canvas.height/matrix.length],
+for (let i = 0; i < matrixHeight; i++) 
+	for (let j = 0; j < matrixWidth; j++)
+		matrix[i][j] = {startPos: [j * cellWidth, i * cellHeight],
+						endPos: [(j + 1) * cellWidth, (i + 1) * cellHeight],
 						freeTime: maxFreeTime,
 						textStyle: "#a0a0a0"};
 
 let ctxArr = new Array(matrixHeight);
-for(let i = 0; i < ctxArr.length; i++)
+for(let i = 0; i < matrixHeight; i++)
 	ctxArr[i] = new Array(matrixWidth);
 
 let count = 0;
+let goldCount = 0;
 let fps = 0;
 let a = document.getElementById("score");
 
 // The main game loop
 let lastTime = Date.now();;
 function main() {
-    var now = Date.now();
-    var dt = (now - lastTime) / 1000.0;
+    let now = Date.now();
+    let dt = (now - lastTime) / 1000.0;
 
     //calculate average fps (15 frames)
     fps += 1/dt;
@@ -60,6 +152,11 @@ function main() {
     	count = 0;
     	fps = 0;
     }
+    if (goldCount == 30) {
+    	totalGold += goldMulti;
+    	//a.innerText = totalGold;
+    	goldCount = 0;
+    }
 
     update(dt);
     render();
@@ -67,6 +164,7 @@ function main() {
     lastTime = now;
     requestAnimFrame(main);
     count++;
+    goldCount++;
 };
 
 function init() {
@@ -81,14 +179,21 @@ function init() {
 
 resources.load([
     'img/sprites.png',
-    'img/space-ship.png'
+    'img/space-ship.png',
+    'img/unit3.png',
+    'img/6B.png',
+    'img/8B.png',
+    'img/13.png',
+    'img/exhaust.png',
+    'img/12B.png'
 ]);
 resources.onReady(init);
 
 // Game state
 let player = {
     pos: [0, 0],
-    sprite: new Sprite('img/space-ship.png', [0, 32], [28, 35])
+    sprite: new Sprite('img/6B.png', [0, 0], [85, 51]),
+    hp: 100
 };
 
 let exhaustLeft = {
@@ -102,10 +207,12 @@ let exhaustRight = {
 };
 
 let bullets = [];
+let rockets = [];
 let enemies = [];
 let explosions = [];
 
 let lastFire = Date.now();
+let lastFireRocket = Date.now();
 let gameTime = 0;
 let isGameOver;
 let terrainPattern;
@@ -114,12 +221,23 @@ let score = 0;
 let scoreEl = document.getElementById('score');
 
 // Speed in pixels per second
-let playerSpeed = 200;
-let bulletSpeed = 500;
-let enemySpeedX = 250;
-let enemySpeedY = 150;
+let playerSpeed = 300;
+let enemySpeed = 150;
 
-let moveAI ='';
+let bulletSpeed = 500;
+let initBulletDamage = 1;
+let bulletFrequency = 300;
+
+let rocketSpeed = 150;
+let initRocketDamage = 10;
+let rocketFrequency = 1500;
+
+let moveAI = {};
+	moveAI.down = false;
+	moveAI.up = false;
+	moveAI.right = false;
+	moveAI.left = false;
+	moveAI.target = [];
 // Update game objects
 function update(dt) {
     gameTime += dt;
@@ -130,178 +248,173 @@ function update(dt) {
 
     // It gets harder over time by adding enemies using this
     // equation: 1-.993^gameTime
-    /*if(Math.random() < 1 - Math.pow(0, gameTime)) {*/
+
     canvas.onclick = function (event) {
-    	let posX = event.clientX - document.getElementsByTagName('canvas')[0].offsetLeft;
-    	let posY = event.clientY - document.getElementsByTagName('canvas')[0].offsetTop - 20;
-        enemies.push({
-            pos: [posX - 39/2, posY],
-            sprite: new Sprite('img/sprites.png', [0, 0], [39, 32], 10, [0,1], null, null, [posX, posY], enemySpeedY)
-        });
+    	let posY = event.clientY - (canvas.offsetTop + 
+    								canvas.parentElement.offsetTop + 
+    								canvas.parentElement.parentElement.offsetTop);
+    	if (posY > canvas.height - 90) {
+    		if (selectedUnit === 0 /*&& totalGold >= 1*/) {
+    			let posX = event.clientX - (canvas.offsetLeft + 
+    								canvas.parentElement.offsetLeft + 
+    								canvas.parentElement.parentElement.offsetLeft) - 35/2;
+    			let posY = event.clientY - (canvas.offsetTop + 
+    								canvas.parentElement.offsetTop + 
+    								canvas.parentElement.parentElement.offsetTop) - 45/2;
+    			totalGold -= 1;
+        		enemies.push({
+        		    pos: [posX, posY],
+        		    sprite: new Sprite('img/8B.png', [0, 0], [35, 45]),
+        		    startPos: [posX, posY],
+        		    speed: enemySpeed,
+        		    moveType: 'non-linear',
+        		    type: selectedUnit,
+        		    damage: 3,
+        		    hp: 2
+        		});
+        	}
+        	if (selectedUnit === 1 /*&& totalGold >= 10*/) {
+        		let unitWidth = 84;  // search at sprite picture
+        		let unitHeight = 52;  // search at sprite picture
+        		let posX = event.clientX - (canvas.offsetLeft + 
+    								canvas.parentElement.offsetLeft + 
+    								canvas.parentElement.parentElement.offsetLeft) - unitWidth/2;
+    			let posY = event.clientY - (canvas.offsetTop + 
+    								canvas.parentElement.offsetTop + 
+    								canvas.parentElement.parentElement.offsetTop) - unitHeight/2;
+        		totalGold -= 10;
+        		enemies.push({
+        		    pos: [posX, posY],
+        		    sprite: new Sprite('img/13.png', [0, 0], [unitWidth, unitHeight]),
+        		    startPos: [posX, posY],
+        		    speed: 100,
+        		    moveType: 'linear',
+        		    type: selectedUnit,
+        		    damage: 10,
+        		    hp: 10,
+        		    exhaust: {
+        		    	sprite: new Sprite('img/exhaust.png', [0, 0], [12, 32], 50, [3,2]),
+        		    	pos: [] },
+        		    exhaustPos: [[unitWidth/2 - 17, unitHeight - 3], [unitWidth/2 + 6, unitHeight - 3]],
+        		    exhausts: []
+        		});
+        	}
+        	if (selectedUnit === 2) {
+        		let unitWidth = 171;  // search at sprite picture
+        		let unitHeight = 61;  // search at sprite picture
+        		let posX = event.clientX - (canvas.offsetLeft + 
+    								canvas.parentElement.offsetLeft + 
+    								canvas.parentElement.parentElement.offsetLeft) - unitWidth/2;
+    			let posY = event.clientY - (canvas.offsetTop + 
+    								canvas.parentElement.offsetTop + 
+    								canvas.parentElement.parentElement.offsetTop) - unitHeight/2 ;
+        		totalGold -= 10;
+        		enemies.push({
+        		    pos: [posX, posY],
+        		    sprite: new Sprite('img/12B.png', [0, 0], [unitWidth, unitHeight]),
+        		    startPos: [posX, posY],
+        		    speed: 150,
+        		    moveType: 'linear',
+        		    type: selectedUnit,
+        		    damage: 20,
+        		    hp: 100,
+        		    exhaust: {
+        		    	sprite: new Sprite('img/exhaust.png', [0, 0], [12, 32], 50, [1,2]),
+        		    	pos: [] },
+        		    exhaustPos: [[unitWidth/2 - 30, unitHeight - 7], [unitWidth/2 + 18, unitHeight - 7]],
+        		    exhausts: []
+        		});
+        	}
+        	if (selectedUnit === 3) {}
+            createPath();
+        	moveAI = avoidEnemy(undefined, selectedUnit);
+        }
     }
-    findPosition();
+    findPosition(); 
     createPath();
-    moveAI = avoidEnemy();
+    moveAI = avoidEnemy(moveAI);
 
     checkCollisions();
-    //if (gameTime >= 20) gameOver(); 
+    if (gameTime >= 60) 
+        bulletFrequency = 150;
+    if (gameTime >= 180) 
+        rocketFrequency = 500;
+        /*gameOver(); */
 
     //scoreEl.innerHTML = score;
 };
 
-let num = 0;
-let avoidEnemy = function f() {
+let handleInput = function handleInput(dt) {
 
-	let jStart = Math.floor(player.pos[0] / (canvas.width / matrixWidth));
-	let jEnd = Math.floor((player.pos[0] + player.sprite.size[0]) / (canvas.width / matrixWidth));
-
-	let iStart = Math.floor(player.pos[1] / (canvas.height / matrixHeight));
-	let iEnd = Math.floor((player.pos[1] + player.sprite.size[1]) / (canvas.height / matrixHeight));
-
-	/*if (num == 0) {
-		console.log([[iStart,iEnd],[jStart,jEnd]]);
-		num++;
-	}*/
-	if (matrix[iEnd][jStart].freeTime === maxFreeTime && 
-		matrix[iEnd][jEnd].freeTime === maxFreeTime)
-		return '';
-
-	if (matrix[iEnd][jStart].freeTime === maxFreeTime && 
-		matrix[iEnd][jEnd].freeTime !== maxFreeTime)
-		return 'left';
-
-	if (matrix[iEnd][jStart].freeTime !== maxFreeTime && 
-		matrix[iEnd][jEnd].freeTime === maxFreeTime)
-		return 'right';
-
-	if (jStart !== 0 && jStart !== matrixWidth - 1) {
-		if (matrix[iEnd][jStart-1].freeTime > matrix[iEnd][jStart+1].freeTime) {
-			return 'left';
-		}
-		if (matrix[iEnd][jStart-1].freeTime < matrix[iEnd][jStart+1].freeTime) {
-			return 'right';
-		}
-		if (matrix[iEnd][jStart-1].freeTime === matrix[iEnd][jStart+1].freeTime &&
-			matrix[iEnd][jStart-1].freeTime > matrix[iEnd][jStart].freeTime) {
-			if (jStart > matrixWidth / 2) return 'left';
-			else return 'right';
-		}
-	}
-	if (jStart === 0 && matrix[iEnd][jStart+1].freeTime > matrix[iEnd][jStart].freeTime) { return 'right'; }
-	if (jStart === matrixWidth - 1 && matrix[iEnd][jStart-1].freeTime > matrix[iEnd][jStart].freeTime) { return 'left'; }
-}
-
-let createPath = function f() {
-	for(let k = 0; k < enemies.length; k++) {
-		let jStart = Math.floor(enemies[k].pos[0] / (canvas.width / matrixWidth));
-		let jEnd = Math.floor((enemies[k].pos[0] + enemies[k].sprite.size[0]) / (canvas.width / matrixWidth));
-		if (jStart < 0) jStart = 0;
-		if (jEnd == matrixWidth) jEnd -= 1;
-
-		let iStart = Math.floor(enemies[k].pos[1] / (canvas.height / matrixHeight));
-		let iEnd = Math.floor((enemies[k].pos[1] + enemies[k].sprite.size[1]) / (canvas.height / matrixHeight));
-		if (iEnd > matrixHeight-1) iEnd = matrixHeight-1;
-
-		for(let j = jStart; j <= jEnd ; j++) {
-			for(let i = iStart; i >= -1 ; i--) {
-				if (i == iStart) {
-					if (i >= 0 && i < matrixHeight-1) { 
-						matrix[i][j].freeTime = 0;
-						matrix[i+1][j].freeTime = 0;
-					}
-				}
-				else if (i >= 0) { 
-					if (matrix[i][j].freeTime == 0) break;
-					let dPos = enemies[k].pos[1] - matrix[i][j].endPos[1];
-					matrix[i][j].freeTime = Math.round(dPos / enemies[k].sprite.speed * 1000); 
-				}
-			}
-			for(let i = iEnd + 1; i < matrixHeight; i++) {
-				if (iStart == -1) matrix[i-1][j].freeTime = maxFreeTime;
-				if (matrix[i][j].freeTime == 0) matrix[i][j].freeTime = maxFreeTime;
-			}
-		}	
-	}
-}
-
-let findPosition = function f() {
-	/*for (let j = 0; j < matrixWidth; j++)
-		for (let i = matrixHeight - 1; i >= 0; i--) 
-		 {
-			if (((matrix[i][j].startPos[1] <= player.pos[1] && player.pos[1] <= matrix[i][j].endPos[1]) &&
-				(matrix[i][j].startPos[0] <= player.pos[0] && player.pos[0] <= matrix[i][j].endPos[0])) ||
-				((matrix[i][j].startPos[1] <= player.pos[1] + player.sprite.size[1]  && player.pos[1] <= matrix[i][j].endPos[1]) &&
-				(matrix[i][j].startPos[0] <= player.pos[0] + player.sprite.size[0] && player.pos[0] <= matrix[i][j].endPos[0]))){
-				matrix[i][j].textStyle = "red";
-			}
-			else matrix[i][j].textStyle = "#a0a0a0";
-
-			
-		}*/
-}
-
-function handleInput(dt) {
-
-    if(input.isDown('DOWN') || input.isDown('s') || moveAI == 'down') {
+    if(/*input.isDown('DOWN') || input.isDown('s') || */moveAI.down) {
         player.pos[1] += playerSpeed * dt;
     }
 
-    if(input.isDown('UP') || input.isDown('w') || moveAI == 'up') {
+    if(/*input.isDown('UP') || input.isDown('w') || */moveAI.up) {
         player.pos[1] -= playerSpeed * dt;
     }
 
-    if(input.isDown('LEFT') || input.isDown('a') || moveAI == 'left') {
+    if(/*input.isDown('LEFT') || input.isDown('a') || */moveAI.left) {
         player.pos[0] -= playerSpeed * dt;
     }
 
-    if(input.isDown('RIGHT') || input.isDown('d') || moveAI == 'right') {
+    if(/*input.isDown('RIGHT') || input.isDown('d') || */moveAI.right) {
         player.pos[0] += playerSpeed * dt;
     }
 
-    exhaustRight.pos[0] = player.pos[0] + 17;
-    exhaustRight.pos[1] = player.pos[1] - 29;
+    // set start pos for player's exhaust
+    exhaustRight.pos[0] = player.pos[0] + 45;
+    exhaustRight.pos[1] = player.pos[1] - 26;
 
-    exhaustLeft.pos[0] = player.pos[0] - 1;
-    exhaustLeft.pos[1] = player.pos[1] - 29;
+    exhaustLeft.pos[0] = player.pos[0] + 28;
+    exhaustLeft.pos[1] = player.pos[1] - 26;
 
     if((input.isDown('SPACE') || true) &&
        !isGameOver &&
-       Date.now() - lastFire > 1000) {
-        var x = player.pos[0];
-        var y = player.pos[1] + player.sprite.size[1] / 2;
+        Date.now() - lastFire > bulletFrequency) {
+        let x = player.pos[0];
+        let y = player.pos[1] + player.sprite.size[1] / 2;
 
-        /*bullets.push({ pos: [x, y-15],
-                       dir: 'forward',
-                       sprite: new Sprite('img/sprites.png', [0, 39], [18, 8]) });
-        bullets.push({ pos: [x, y-5],
-                       dir: 'forward',
-                       sprite: new Sprite('img/sprites.png', [0, 39], [18, 8]) });
-        bullets.push({ pos: [x, y+5],
-                       dir: 'forward',
-                       sprite: new Sprite('img/sprites.png', [0, 39], [18, 8]) });
-        bullets.push({ pos: [x, y],
-                       dir: 'up',
-                       sprite: new Sprite('img/sprites.png', [0, 50], [9, 5]) });*/
-        bullets.push({ pos: [x-1, y],
+        bullets.push({ pos: [x + player.sprite.size[0] / 2 - 14, y],
                        dir: 'down',
-                       sprite: new Sprite('img/space-ship.png', [0, 70], [10, 25]) });
+                       sprite: new Sprite('img/space-ship.png', [0, 70], [10, 25]),
+                       damage: initBulletDamage });
         bullets.push({ pos: [x + player.sprite.size[0] / 2 + 4, y],
                        dir: 'down',
-                       sprite: new Sprite('img/space-ship.png', [0, 70], [10, 25]) });
-
+                       sprite: new Sprite('img/space-ship.png', [0, 70], [10, 25]),
+                       damage: initBulletDamage });
         lastFire = Date.now();
     }
+
+    if (gameTime >= 120)
+        if((input.isDown('SPACE') || true) &&
+       		!isGameOver &&
+        	Date.now() - lastFireRocket > rocketFrequency) {
+        	let x = player.pos[0];
+        	let y = player.pos[1] + player.sprite.size[1] / 2;
+        	rockets.push({ pos: [x + player.sprite.size[0] / 2 - 40, y],
+        	               dir: 'down',
+        	               sprite: new Sprite('img/space-ship.png', [0, 70], [10, 25]),
+        	               damage: initRocketDamage });
+        	rockets.push({ pos: [x + player.sprite.size[0] / 2 + 30, y],
+        	               dir: 'down',
+        	               sprite: new Sprite('img/space-ship.png', [0, 70], [10, 25]),
+        	               damage: initRocketDamage });
+        	lastFireRocket = Date.now();
+        }
+
+        
 }
 
-function updateEntities(dt) {
+let updateEntities = function updateEntities(dt) {
     // Update the player sprite animation
     player.sprite.update(dt);
     exhaustRight.sprite.update(dt);
     exhaustLeft.sprite.update(dt);
 
     // Update all the bullets
-    for(var i=0; i<bullets.length; i++) {
-        var bullet = bullets[i];
+    for(let i = 0; i < bullets.length; i++) {
+        let bullet = bullets[i];
 
         switch(bullet.dir) {
         case 'up': bullet.pos[1] -= bulletSpeed * dt; break;
@@ -318,20 +431,75 @@ function updateEntities(dt) {
         }
     }
 
+    for(let i = 0; i < rockets.length; i++) {
+        let rocket = rockets[i];
+
+        switch(rocket.dir) {
+        case 'up': rocket.pos[1] -= rocketSpeed * dt; break;
+        case 'down': rocket.pos[1] += rocketSpeed * dt; break;
+        default:
+            rocket.pos[0] += rocketSpeed * dt;
+        }
+
+        // Remove the rocket if it goes offscreen
+        if(rocket.pos[1] < 0 || rocket.pos[1] > canvas.height ||
+           rocket.pos[0] > canvas.width) {
+            rockets.splice(i, 1);
+            i--;
+        }
+    }
+
     // Update all the enemies
     for(let k = 0; k < enemies.length; k++) {
-        enemies[k].pos[1] = enemies[k].pos[1] - enemies[k].sprite.speed * dt;
+    	if (enemies[k].moveType == 'non-linear') {
+        	enemies[k].pos[1] = enemies[k].pos[1] - enemies[k].speed * dt;
+        	if (enemies[k].startPos[0] >= canvas.width / 2)
+        		enemies[k].pos[0] = enemies[k].startPos[0] - (canvas.width - enemies[k].startPos[0] - 40) * 
+        							(Math.sin((enemies[k].startPos[1] - enemies[k].pos[1]) / 50));
+        	else 
+        		enemies[k].pos[0] = enemies[k].startPos[0] - enemies[k].startPos[0] * 
+        					 		(Math.sin((enemies[k].startPos[1] - enemies[k].pos[1]) / 50));
+       	}
+       	if (enemies[k].moveType == 'linear') {
+       	 	enemies[k].pos[1] = enemies[k].pos[1] - enemies[k].speed * dt;
+       	}
+
+       	// add exhaust to armyUnit
+       	if (!!enemies[k].exhaustPos) {
+       		
+       			enemies[k].exhaustPos.map(function (item, i) {
+       				let currentEx = {};
+					for (let key in enemies[k].exhaust) {
+					  	currentEx[key] = enemies[k].exhaust[key];
+					}
+
+       				currentEx.pos[0] = enemies[k].pos[0] + item[0];
+       				currentEx.pos[1] = enemies[k].pos[1] + item[1];
+       				
+       				enemies[k].exhausts[i] = {'sprite': currentEx.sprite, 'pos': currentEx.pos.slice()};
+       			});
+       		
+       		enemies[k].exhausts.map((item) => item.sprite.update(dt));
+       	}
+
+
 
         enemies[k].sprite.update(dt);
 
         // Remove if offscreen
         if(enemies[k].pos[0] + enemies[k].sprite.size[0] < 0 ||
-           enemies[k].pos[1] + enemies[k].sprite.size[1] < 20) {
+           enemies[k].pos[1] + enemies[k].sprite.size[1] < -10) {
 
         	enemies.splice(k, 1);
             k--;
         }
+
+        
     }
+    if (enemies.length == 0)
+        for (let i = 0; i < matrixHeight; i++)
+            for (let j = 0; j < matrixWidth; j++)
+                matrix[i][j].freeTime = maxFreeTime;
 
     // Update all the explosions
     for(let i = 0; i < explosions.length; i++) {
@@ -347,23 +515,24 @@ function updateEntities(dt) {
 
 // Collisions
 
-function collides(x, y, r, b, x2, y2, r2, b2) {
+let collides = function collides(x, y, r, b, x2, y2, r2, b2) {
     return !(r <= x2 || x > r2 ||
              b <= y2 || y > b2);
 }
 
-function boxCollides(pos, size, pos2, size2) {
+let boxCollides = function boxCollides(pos, size, pos2, size2) {
     return collides(pos[0], pos[1],
                     pos[0] + size[0], pos[1] + size[1],
                     pos2[0], pos2[1],
                     pos2[0] + size2[0], pos2[1] + size2[1]);
 }
 
-function checkCollisions() {
+let checkCollisions = function checkCollisions() {
     checkPlayerBounds();
     
     // Run collision detection for all enemies and bullets
     for(let i = 0; i < enemies.length; i++) {
+    	let isBreaked = false;
         let pos = enemies[i].pos;
         let size = enemies[i].sprite.size;
 
@@ -372,33 +541,40 @@ function checkCollisions() {
             let size2 = bullets[j].sprite.size;
 
             if(boxCollides(pos, size, pos2, size2)) {
-                // Remove the enemy
-
-                let jStart = Math.floor(enemies[i].pos[0] / (canvas.width / matrixWidth));
-				let jEnd = Math.floor((enemies[i].pos[0] + enemies[i].sprite.size[0]) / (canvas.width / matrixWidth));
-				if (jStart < 0) jStart = 0;
-				if (jEnd == matrixWidth) jEnd -= 1;
-				for (let i = 0; i < matrixHeight; i++)
-					for (let j = jStart; j <= jEnd; j++)
-						matrix[i][j].freeTime = maxFreeTime;
-
-                enemies.splice(i, 1);
-                i--;
-
-                // Add score
-                score += 100;
-
-                // Add an explosion
-                explosions.push({
-                    pos: pos,
-                    sprite: new Sprite('img/sprites.png',
-                                       [0, 117],
-                                       [39, 39],
-                                       16,
-                                       [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                                       null,
-                                       true)
-                });
+                enemies[i].hp -= bullets[j].damage;
+            	if (enemies[i].hp <= 0) {
+                    if (enemies[i].moveType === 'linear') {
+                	    let jStart = Math.floor(enemies[i].pos[0] / (canvas.width / matrixWidth));
+					    let jEnd = Math.floor((enemies[i].pos[0] + enemies[i].sprite.size[0]) / (canvas.width / matrixWidth));
+					    if (jStart < 0) jStart = 0;
+					    if (jEnd == matrixWidth) jEnd -= 1;
+					    for (let i = 0; i < matrixHeight; i++)
+					   	for (let j = jStart; j <= jEnd; j++)
+					   		matrix[i][j].freeTime = maxFreeTime;
+                    }
+                    else if (enemies[i].moveType === 'non-linear')
+                        createPathNLinear(enemies[i], true);
+	
+					// Remove the enemy
+                	enemies.splice(i, 1);
+                	i--;
+                	isBreaked = true;
+	
+                	// Add score
+                	score += 100;
+	
+                	// Add an explosion
+                	explosions.push({
+                	    pos: pos,
+                	    sprite: new Sprite('img/sprites.png',
+                	                       [0, 117],
+                	                       [39, 39],
+                	                       16,
+                	                       [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                	                       null,
+                	                       true)
+                	});
+                }
 
                 // Remove the bullet and stop this iteration
                 bullets.splice(j, 1);
@@ -406,13 +582,89 @@ function checkCollisions() {
             }
         }
 
+        for(let j = 0; j < rockets.length; j++) {
+            let pos2 = rockets[j].pos;
+            let size2 = rockets[j].sprite.size;
+
+            if(boxCollides(pos, size, pos2, size2)) {
+                enemies[i].hp -= rockets[j].damage;
+            	if (enemies[i].hp <= 0) {
+                    if (enemies[i].moveType === 'linear') {
+                	    let jStart = Math.floor(enemies[i].pos[0] / (canvas.width / matrixWidth));
+					    let jEnd = Math.floor((enemies[i].pos[0] + enemies[i].sprite.size[0]) / (canvas.width / matrixWidth));
+					    if (jStart < 0) jStart = 0;
+					    if (jEnd == matrixWidth) jEnd -= 1;
+					    for (let i = 0; i < matrixHeight; i++)
+					   	for (let j = jStart; j <= jEnd; j++)
+					   		matrix[i][j].freeTime = maxFreeTime;
+                    }
+                    else if (enemies[i].moveType === 'non-linear')
+                        createPathNLinear(enemies[i], true);
+	
+					// Remove the enemy
+                	enemies.splice(i, 1);
+                	i--;
+                	isBreaked = true;
+	
+                	// Add score
+                	score += 100;
+	
+                	// Add an explosion
+                	explosions.push({
+                	    pos: pos,
+                	    sprite: new Sprite('img/sprites.png',
+                	                       [0, 117],
+                	                       [39, 39],
+                	                       16,
+                	                       [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                	                       null,
+                	                       true)
+                	});
+                }
+
+                // Remove the rocket and stop this iteration
+                rockets.splice(j, 1);
+                break;
+            }
+        }
+        if (isBreaked) { continue; }
+
         if(boxCollides(pos, size, player.pos, player.sprite.size)) {
-            gameOver();
+        	if (!enemies[i].collide) {
+        		enemies[i].collide = true;
+        		player.hp -= enemies[i].damage;
+        		updateHP(player.hp);
+        	}
+        	if (player.hp <= 0)
+            	gameOver();
+
+            let jStart = Math.floor(enemies[i].pos[0] / (canvas.width / matrixWidth));
+			let jEnd = Math.floor((enemies[i].pos[0] + enemies[i].sprite.size[0]) / (canvas.width / matrixWidth));
+			if (jStart < 0) jStart = 0;
+			if (jEnd == matrixWidth) jEnd -= 1;
+			for (let i = 0; i < matrixHeight; i++)
+				for (let j = jStart; j <= jEnd; j++)
+					matrix[i][j].freeTime = maxFreeTime;
+
+            enemies.splice(i, 1);
+            i--;
+
+            // Add an explosion
+            explosions.push({
+                pos: pos,
+                sprite: new Sprite('img/sprites.png',
+                                   [0, 117],
+                                   [39, 39],
+                                   16,
+                                   [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                                   null,
+                                   true)
+            });
         }
     }
 }
 
-function checkPlayerBounds() {
+let checkPlayerBounds = function checkPlayerBounds() {
     // Check bounds
     if(player.pos[0] < 0) {
         player.pos[0] = 0;
@@ -436,9 +688,9 @@ bgImage.src = "img/background-min.png";
    
 // Draw everything
 function render() {
-	/*let ctxText = canvas.getContext("2d");
-	ctxText.font = "16px Arial";
-	ctxText.textAlign = "center";*/
+	let ctxText = canvas.getContext("2d");
+	ctxText.font = "8px Arial";
+	ctxText.textAlign = "center";
 
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	let pattern = ctx.createPattern(bgImage, "repeat");	
@@ -446,20 +698,27 @@ function render() {
 	ctx.rect(0, 0, canvas.width, canvas.height);
 	ctx.fill();
 
-    for (let i = 0; i < ctxArr.length; i++) 
-		for (let j = 0; j < ctxArr[0].length; j++) {
+	ctxLine = canvas.getContext("2d"); // WAT!!! Без этих строк
+	ctxLine.beginPath();				// быстро снижается FPS
+	ctxLine.lineWidth = "1";	
+	ctxLine.strokeStyle = "red";	
+	ctxLine.moveTo(0, canvas.height - 90);
+	ctxLine.lineTo(canvas.width, canvas.height - 90);
+	ctxLine.stroke();
+    /*for (let i = 0; i < matrixHeight; i++) 
+		for (let j = 0; j < matrixWidth; j++) {
 			ctxArr[i][j] = canvas.getContext("2d");
 			ctxArr[i][j].beginPath();
-			/*ctxArr[i][j].lineWidth = "1";
+			ctxArr[i][j].lineWidth = "1";
 			ctxArr[i][j].strokeStyle = "transparent";
 			ctxArr[i][j].rect(matrix[i][j].startPos[0], matrix[i][j].startPos[1], 
-							  canvas.width/matrix[i].length, canvas.height/matrix.length);	
+							  canvas.width / matrix[i].length, canvas.height/matrix.length);	
 			ctxArr[i][j].stroke();
 			ctxText.fillStyle = matrix[i][j].textStyle;
 			ctxText.fillText(matrix[i][j].freeTime, 
 							 matrix[i][j].startPos[0]+(matrix[i][j].endPos[0] - matrix[i][j].startPos[0])/2, 
-							 matrix[i][j].startPos[1]+(matrix[i][j].endPos[1] - matrix[i][j].startPos[1])/2 + 5);*/
-		}
+							 matrix[i][j].startPos[1]+(matrix[i][j].endPos[1] - matrix[i][j].startPos[1])/2 + 5);
+		}*/
 
     // Render the player if the game isn't over
     if(!isGameOver) {
@@ -467,14 +726,18 @@ function render() {
         renderEntity(exhaustRight);
         renderEntity(exhaustLeft);
         renderEntities(bullets);
+        renderEntities(rockets);
     	renderEntities(enemies);
+    	enemies.map(function(item) {
+    		if (!!item.exhausts) 
+    			renderEntities(item.exhausts) 
+    		});
     	renderEntities(explosions);
     }
-    
 };
 
 function renderEntities(list) {
-    for(var i=0; i < list.length; i++) {
+    for(let i = 0; i < list.length; i++) {
         renderEntity(list[i]);
     }    
 }
@@ -483,6 +746,13 @@ function renderEntity(entity) {
     ctx.save();
     ctx.translate(entity.pos[0], entity.pos[1]);
     entity.sprite.render(ctx);
+    ctx.restore();
+}
+
+function renderExhaust(entity) {
+    ctx.save();
+    ctx.translate(entity.pos[0], entity.pos[1]);
+    entity.render(ctx);
     ctx.restore();
 }
 
@@ -502,13 +772,16 @@ function reset() {
     isGameOver = false;
     gameTime = 0;
     score = 0;
+    player.hp = 100;
+    updateHP();
 
-    /*for (let i = 0; i < matrixHeight; i++)
+    for (let i = 0; i < matrixHeight; i++)
     	for (let j = 0; j < matrixWidth; j++)
-    		matrix[i][j] = maxFreeTime;*/
+    		matrix[i][j].freeTime = maxFreeTime;
 
     enemies = [];
     bullets = [];
+    rockets = [];
 
     player.pos = [canvas.width/2-20, canvas.height / matrixHeight+1];
     exhaustLeft.pos = [player.pos[0], player.pos[1]-20];
@@ -516,33 +789,4 @@ function reset() {
 };
 
 
-// health points bar
-/*
-var c = document.getElementById("myCanvas");
-var ctx = c.getContext("2d");
-let height = 30;
-let width = 250;
-hpPersent = 10;
 
-// Red rectangle
-ctx.beginPath();
-ctx.lineWidth = "2";
-ctx.strokeStyle = "#000";
-ctx.rect(5, 5, width, height);  
-ctx.stroke();
-
-// Green rectangle
-ctx.beginPath();
-ctx.lineWidth = "4";
-ctx.fillStyle = "green";
-ctx.fillRect(6, 6, width*hpPersent/100-2, height-2);
-
-
-// Green rectangle
-//if (hpPersent < 100) {
-    ctx.beginPath();    
-    ctx.lineWidth = "4";
-    ctx.fillStyle = "red";
-    ctx.fillRect(width*hpPersent/100+4, 6, width-width*hpPersent/100, height-2);
-//}
-*/

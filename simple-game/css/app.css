@@ -1,20 +1,13 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
 html, body {
     margin: 0;
     padding: 0;
     background-color: #151515;
     background-image: url(../img/background.png);
-}
-
-canvas {
-    display: block;
-    margin: auto;
-
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border: 2px solid #000000; 
 }
 
 .wrapper {
@@ -71,3 +64,101 @@ canvas {
 #game-over button {
     font-size: 1.5em;
 }
+
+#game-field {
+    display: block;
+    margin: auto;
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 600px;
+    width: 650px;
+    /*border: 1px solid #000000;*/
+}
+
+#time-block {
+    position: relative;
+    width: 100%;
+}
+
+#army-wrap {
+    height: 280px;
+    position: absolute;
+    bottom: 40px;
+    display: inline-block;
+    align-items: center;
+}
+
+#army-wrap div {
+    box-sizing: border-box;
+    height: 70px;
+    width: 70px;
+    position: relative;
+    display: flex;
+    background-color: #0f0f0f;
+    opacity: 0.3;
+}
+
+.wrap {
+    display: inline-block;
+}
+
+#canvas {
+    display: block;
+    position: relative;
+    border: 2px solid #0f0f0f; 
+}
+#hp {
+    display: block;
+    opacity: 0.4;
+}
+
+.hotkey {
+    position: relative;
+    left: 3px;
+    color: white;
+    font-family: sans-serif;
+    font-size: 14px;
+}
+
+.cost{
+    text-align: right;
+    position: absolute;
+    bottom: 3px;
+    right: 3px;
+    color: white;
+    font-family: sans-serif;
+    font-size: 14px;
+}
+
+#unit1 {
+    background-image: url(../img/8B.png);
+    background-size: 40px 34px;
+    background-position: 50% 40%;
+    background-repeat: no-repeat;
+}
+
+#unit2 {
+    background-image: url(../img/13.png);
+    background-size: 50px 28px;
+    background-position: 50% 40%;
+    background-repeat: no-repeat;
+}
+
+#unit3 {
+    background-image: url(../img/12B.png);
+    background-size: 64px 30px;
+    background-position: 50% 40%;
+    background-repeat: no-repeat;
+}
+
+#unit4 {
+    background-image: url(../img/3.png);
+    background-size: 44px 48px;
+    background-position: 50% 25%;
+    background-repeat: no-repeat;
+}
+

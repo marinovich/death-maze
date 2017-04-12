@@ -19,21 +19,41 @@
     </div>
 
     <div class="wrapper">
-      <div id="instructions">
-        <div>
-          move with <span class="key">arrows</span> or <span class="key">wasd</span>
-        </div>
-        <div>
-          shoot with <span class="key">space</span>
-        </div>
-      </div>
-
       <div id="score"></div>
     </div>
+
+    <div id="game-field">
+    	<div class="wrap">
+    		<div id="time-block"></div>
+    		<canvas id="hp"></canvas>
+    		<canvas id="canvas"></canvas>
+    		<div id="status-bar"></div> 
+    	</div>
+    	<div id="army-wrap">
+    		<div id="unit4">
+    			<span class="hotkey">z</span>
+    			<span class="cost"><img src="img/coin.png" width="10" height="10"> 1000</span>
+    		</div>
+    		<div id="unit3">
+    			<span class="hotkey">x</span>
+    			<span class="cost"><img src="img/coin.png" width="10" height="10"> 100</span>
+    		</div>
+    		<div id="unit2">
+    			<span class="hotkey">c</span>
+    			<span class="cost"><img src="img/coin.png" width="10" height="10"> 10</span>
+    		</div>
+    		<div id="unit1">
+    			<span class="hotkey">v</span>
+    			<span class="cost"><img src="img/coin.png" width="10" height="10"> 1</span>
+    		</div>
+    	</div>   	
+    </div>
+    
 
     <script type="text/javascript" src="js/resources.js"></script>
     <script type="text/javascript" src="js/input.js"></script>
     <script type="text/javascript" src="js/sprite.js"></script>
+    <script type="text/javascript" src="js/ai.js"></script>
     <script type="text/javascript" src="js/app.js"></script>
   </body>
 </html>
