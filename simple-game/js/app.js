@@ -17,14 +17,17 @@ const armyUnit3 = document.getElementById("unit3");
 const armyUnit4 = document.getElementById("unit4");
 const timeBlock = document.getElementById("time-block");
 const statusBar = document.getElementById("status-bar");
+const gold = document.getElementById("gold");
+const upgradeTime = document.getElementById("time-to-upgrade");
+const defeatTime = document.getElementById("time-to-defeat");
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-let hp = document.getElementById("hp");
+const hp = document.getElementById("hp");
 let hpCtx = hp.getContext("2d");
 
-let timeBlockHeight = 50;
+let timeBlockHeight = 28;
 let armyWrapWidth = 70;
 let statusBarHeight = 40;
 
@@ -45,13 +48,6 @@ armyUnit[selectedUnit].style.opacity = '1';
 let totalGold = 100;
 let goldMulti = 1;
 
-document.onkeypress = function(e) {
-	if (String.fromCharCode(e.keyCode || e.charCode) == 'v') { armyUnit[0].onclick(); }
-	if (String.fromCharCode(e.keyCode || e.charCode) == 'c') { armyUnit[1].onclick(); }
-	if (String.fromCharCode(e.keyCode || e.charCode) == 'x') { armyUnit[2].onclick(); }
-	if (String.fromCharCode(e.keyCode || e.charCode) == 'z') { armyUnit[3].onclick(); }
-};
-
 armyUnit.forEach((item,i) => item.onmouseover = () => (i !== selectedUnit) ? item.style.opacity = "0.5" : false);
 
 armyUnit.forEach((item,i) => item.onmouseleave = () => (i !== selectedUnit) ? item.style.opacity = "0.3" : false);
@@ -65,6 +61,13 @@ armyUnit.forEach((item,i,arr) => item.onclick = () =>
 			selectedUnit = index;
 		}
 	}));
+
+document.onkeypress = function(e) {
+    if (String.fromCharCode(e.keyCode || e.charCode) == 'v') { armyUnit[0].onclick(); }
+    if (String.fromCharCode(e.keyCode || e.charCode) == 'c') { armyUnit[1].onclick(); }
+    if (String.fromCharCode(e.keyCode || e.charCode) == 'x') { armyUnit[2].onclick(); }
+    if (String.fromCharCode(e.keyCode || e.charCode) == 'z') { armyUnit[3].onclick(); }
+};
 
 // hp bar
 // Black stroke
@@ -137,6 +140,7 @@ let count = 0;
 let goldCount = 0;
 let fps = 0;
 let a = document.getElementById("score");
+let totalTime = 300; // total time in seconds
 
 // The main game loop
 let lastTime = Date.now();;
@@ -152,9 +156,9 @@ function main() {
     	count = 0;
     	fps = 0;
     }
-    if (goldCount == 30) {
+    if (goldCount == 20) {
     	totalGold += goldMulti;
-    	//a.innerText = totalGold;
+    	gold.innerHTML = totalGold;
     	goldCount = 0;
     }
 
@@ -223,11 +227,19 @@ let scoreEl = document.getElementById('score');
 // Speed in pixels per second
 let playerSpeed = 300;
 let enemySpeed = 150;
+let upgradeTimeArr = [59, 40, 59, 75];
+let upgrades = {
+    'bulletFrequency': 150,
+    'isRockets': true,
+    'rocketFrequency': 800,
+    'playerSpeed': 500
+};
 
 let bulletSpeed = 500;
 let initBulletDamage = 1;
 let bulletFrequency = 300;
 
+let isRockets = false;
 let rocketSpeed = 150;
 let initRocketDamage = 10;
 let rocketFrequency = 1500;
@@ -241,7 +253,11 @@ let moveAI = {};
 // Update game objects
 function update(dt) {
     gameTime += dt;
-    
+    if (gameTime > totalTime)
+        gameOver();
+
+    defeatTime.innerHTML = `${Math.floor((totalTime - gameTime) / 60)}:${Math.floor((totalTime - gameTime) % 60)}`;
+    upgradeTime.innerHTML = `${Math.floor((totalTime - gameTime) / 60)}:${Math.floor((totalTime - gameTime) % 60)}`;
 
     handleInput(dt);
     updateEntities(dt);
@@ -299,7 +315,7 @@ function update(dt) {
         		    exhausts: []
         		});
         	}
-        	if (selectedUnit === 2) {
+        	if (selectedUnit === 2 /*&& totalGold >= 100*/) {
         		let unitWidth = 171;  // search at sprite picture
         		let unitHeight = 61;  // search at sprite picture
         		let posX = event.clientX - (canvas.offsetLeft + 
@@ -308,7 +324,7 @@ function update(dt) {
     			let posY = event.clientY - (canvas.offsetTop + 
     								canvas.parentElement.offsetTop + 
     								canvas.parentElement.parentElement.offsetTop) - unitHeight/2 ;
-        		totalGold -= 10;
+        		totalGold -= 100;
         		enemies.push({
         		    pos: [posX, posY],
         		    sprite: new Sprite('img/12B.png', [0, 0], [unitWidth, unitHeight]),
@@ -335,11 +351,11 @@ function update(dt) {
     moveAI = avoidEnemy(moveAI);
 
     checkCollisions();
+
     if (gameTime >= 60) 
         bulletFrequency = 150;
     if (gameTime >= 180) 
         rocketFrequency = 500;
-        /*gameOver(); */
 
     //scoreEl.innerHTML = score;
 };
@@ -569,7 +585,7 @@ let checkCollisions = function checkCollisions() {
                 	    sprite: new Sprite('img/sprites.png',
                 	                       [0, 117],
                 	                       [39, 39],
-                	                       16,
+                	                       50,
                 	                       [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
                 	                       null,
                 	                       true)
@@ -615,7 +631,7 @@ let checkCollisions = function checkCollisions() {
                 	    sprite: new Sprite('img/sprites.png',
                 	                       [0, 117],
                 	                       [39, 39],
-                	                       16,
+                	                       50,
                 	                       [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
                 	                       null,
                 	                       true)
@@ -655,7 +671,7 @@ let checkCollisions = function checkCollisions() {
                 sprite: new Sprite('img/sprites.png',
                                    [0, 117],
                                    [39, 39],
-                                   16,
+                                   50,
                                    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
                                    null,
                                    true)
@@ -759,8 +775,9 @@ function renderExhaust(entity) {
 // Game over
 function gameOver() {
     document.getElementById('game-over').style.display = 'block';
-    if (gameTime < 20) { document.getElementById('game-over_reason').innerText = 'ALIENS WIN!'; }
-    else { document.getElementById('game-over_reason').innerText = 'HUMANITY WINS!'; }
+    document.getElementById('game-over_reason').style.fontFamily = 'zorqueregular';
+    if (gameTime <= 240) { document.getElementById('game-over_reason').innerHTML = 'ALIENS WIN!'; }
+    else { document.getElementById('game-over_reason').innerHTML = 'HUMANITY WINS!'; }
     document.getElementById('game-over-overlay').style.display = 'block';
     isGameOver = true;
 }

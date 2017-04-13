@@ -1,11 +1,19 @@
+@font-face {
+    font-family: 'zorqueregular';
+    src: url('../fonts/zorque-webfont.woff2') format('woff2'),
+         url('../fonts/zorque-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
 * {
+    font-family: 'zorqueregular';
     margin: 0;
     padding: 0;
 }
 
 html, body {
-    margin: 0;
-    padding: 0;
     background-color: #151515;
     background-image: url(../img/background.png);
 }
@@ -120,7 +128,6 @@ html, body {
     position: relative;
     left: 3px;
     color: white;
-    font-family: sans-serif;
     font-size: 14px;
 }
 
@@ -130,7 +137,6 @@ html, body {
     bottom: 3px;
     right: 3px;
     color: white;
-    font-family: sans-serif;
     font-size: 14px;
 }
 
@@ -162,3 +168,27 @@ html, body {
     background-repeat: no-repeat;
 }
 
+#time-block {
+    position: relative;
+    opacity: 0.8;
+}
+
+#time-block div {
+    position: absolute;
+    color: white;
+    font-size: 20px; 
+    display: inline-block;  
+}
+
+#time-block span {
+    color: white;
+    font-size: 20px; 
+}
+
+.gold {
+    left: 438px;
+}
+
+.upgrade {
+    left: 250px;
+}
