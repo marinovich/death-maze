@@ -62,11 +62,11 @@ armyUnit.forEach((item,i,arr) => item.onclick = () =>
 		}
 	}));
 
-document.onkeypress = function(e) {
-    if (String.fromCharCode(e.keyCode || e.charCode) == 'v') { armyUnit[0].onclick(); }
-    if (String.fromCharCode(e.keyCode || e.charCode) == 'c') { armyUnit[1].onclick(); }
-    if (String.fromCharCode(e.keyCode || e.charCode) == 'x') { armyUnit[2].onclick(); }
-    if (String.fromCharCode(e.keyCode || e.charCode) == 'z') { armyUnit[3].onclick(); }
+document.onkeydown = function(e) {
+    if (String.fromCharCode(e.keyCode || e.charCode) == 'V') { armyUnit[0].onclick(); }
+    if (String.fromCharCode(e.keyCode || e.charCode) == 'C') { armyUnit[1].onclick(); }
+    if (String.fromCharCode(e.keyCode || e.charCode) == 'X') { armyUnit[2].onclick(); }
+    if (String.fromCharCode(e.keyCode || e.charCode) == 'Z') { armyUnit[3].onclick(); }
 };
 
 // hp bar
@@ -545,6 +545,7 @@ let boxCollides = function boxCollides(pos, size, pos2, size2) {
 
 let checkCollisions = function checkCollisions() {
     checkPlayerBounds();
+    let isDestroyed = false;
     
     // Run collision detection for all enemies and bullets
     for(let i = 0; i < enemies.length; i++) {
@@ -597,6 +598,7 @@ let checkCollisions = function checkCollisions() {
                 break;
             }
         }
+        if (isBreaked) { continue; }
 
         for(let j = 0; j < rockets.length; j++) {
             let pos2 = rockets[j].pos;
@@ -743,11 +745,11 @@ function render() {
         renderEntity(exhaustLeft);
         renderEntities(bullets);
         renderEntities(rockets);
-    	renderEntities(enemies);
-    	enemies.map(function(item) {
-    		if (!!item.exhausts) 
-    			renderEntities(item.exhausts) 
-    		});
+        enemies.map(function(item) {
+            if (!!item.exhausts) 
+                renderEntities(item.exhausts) 
+            });
+    	renderEntities(enemies);    	
     	renderEntities(explosions);
     }
 };

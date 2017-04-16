@@ -6,6 +6,8 @@ let avoidEnemy = function avoidEnemy(target, unitType) {
 		moveAI.left = false;
 		moveAI.target = [];
 
+	let isAvoid = false;
+
 	let jStart = Math.floor(player.pos[0] / cellWidth);
 	let jEnd = Math.floor((player.pos[0] + player.sprite.size[0]) / cellWidth);
 
@@ -31,7 +33,16 @@ let avoidEnemy = function avoidEnemy(target, unitType) {
 			if (target.left || target.right || target.up || target.down)
 				return target;
 		}
-	if (matrix[iEnd][jStart].freeTime !== maxFreeTime || matrix[iEnd][jEnd].freeTime !== maxFreeTime) {
+
+	for (let i = iStart; i <= iEnd; i++)  {
+		for (let j = jStart; j <= jEnd; j++) {
+			if (matrix[i][j].freeTime !== maxFreeTime) isAvoid = true;
+			if (isAvoid) break;
+		}
+		if (isAvoid) break;
+	}
+
+	if (isAvoid) {
 		let targetCell = [];
 		if (unitType !== 0) {
 			for (let k = 0; k < matrixWidth - 3; k++) {
