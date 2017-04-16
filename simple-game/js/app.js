@@ -150,13 +150,14 @@ function main() {
 
     //calculate average fps (15 frames)
     fps += 1/dt;
-    if (count == 15) {
+    if (count === 15) {
     	fps = Math.floor(fps/15);
     	a.innerText = fps;
     	count = 0;
     	fps = 0;
     }
-    if (goldCount == 20) {
+    if (goldCount === 20) {
+        goldMulti = (5 - upgrades.length);
     	totalGold += goldMulti;
     	gold.innerHTML = totalGold;
     	goldCount = 0;
@@ -218,7 +219,7 @@ let explosions = [];
 let lastFire = Date.now();
 let lastFireRocket = Date.now();
 let gameTime = 0;
-let isGameOver;
+let isGameOver = false;
 let terrainPattern;
 
 let score = 0;
@@ -227,13 +228,13 @@ let scoreEl = document.getElementById('score');
 // Speed in pixels per second
 let playerSpeed = 300;
 let enemySpeed = 150;
-let upgradeTimeArr = [59, 40, 59, 75];
-let upgrades = {
-    'bulletFrequency': 150,
-    'isRockets': true,
-    'rocketFrequency': 800,
-    'playerSpeed': 500
-};
+
+let upgrades = [
+    [50, 'bulletFrequency', 150],
+    [150, 'isRockets', true],
+    [220, 'rocketFrequency', 800],
+    [240, 'playerSpeed', 500]
+];
 
 let bulletSpeed = 500;
 let initBulletDamage = 1;
@@ -256,21 +257,22 @@ function update(dt) {
     if (gameTime > totalTime)
         gameOver();
 
-    defeatTime.innerHTML = `${Math.floor((totalTime - gameTime) / 60)}:${Math.floor((totalTime - gameTime) % 60)}`;
-    upgradeTime.innerHTML = `${Math.floor((totalTime - gameTime) / 60)}:${Math.floor((totalTime - gameTime) % 60)}`;
-
+    if (Math.floor((totalTime - gameTime) % 60) >= 10) 
+        defeatTime.innerHTML = `${Math.floor((totalTime - gameTime) / 60)}:${Math.floor((totalTime - gameTime) % 60)}`;
+    else 
+        defeatTime.innerHTML = `${Math.floor((totalTime - gameTime) / 60)}:0${Math.floor((totalTime - gameTime) % 60)}`;
+    
     handleInput(dt);
     updateEntities(dt);
 
-    // It gets harder over time by adding enemies using this
-    // equation: 1-.993^gameTime
+    upgradesTimer();
 
     canvas.onclick = function (event) {
     	let posY = event.clientY - (canvas.offsetTop + 
     								canvas.parentElement.offsetTop + 
     								canvas.parentElement.parentElement.offsetTop);
     	if (posY > canvas.height - 90) {
-    		if (selectedUnit === 0 /*&& totalGold >= 1*/) {
+    		if (selectedUnit === 0 && totalGold >= 1) {
     			let posX = event.clientX - (canvas.offsetLeft + 
     								canvas.parentElement.offsetLeft + 
     								canvas.parentElement.parentElement.offsetLeft) - 35/2;
@@ -289,7 +291,7 @@ function update(dt) {
         		    hp: 2
         		});
         	}
-        	if (selectedUnit === 1 /*&& totalGold >= 10*/) {
+        	if (selectedUnit === 1 && totalGold >= 10) {
         		let unitWidth = 84;  // search at sprite picture
         		let unitHeight = 52;  // search at sprite picture
         		let posX = event.clientX - (canvas.offsetLeft + 
@@ -315,7 +317,7 @@ function update(dt) {
         		    exhausts: []
         		});
         	}
-        	if (selectedUnit === 2 /*&& totalGold >= 100*/) {
+        	if (selectedUnit === 2 && totalGold >= 100) {
         		let unitWidth = 171;  // search at sprite picture
         		let unitHeight = 61;  // search at sprite picture
         		let posX = event.clientX - (canvas.offsetLeft + 
@@ -351,14 +353,23 @@ function update(dt) {
     moveAI = avoidEnemy(moveAI);
 
     checkCollisions();
-
-    if (gameTime >= 60) 
-        bulletFrequency = 150;
-    if (gameTime >= 180) 
-        rocketFrequency = 500;
-
     //scoreEl.innerHTML = score;
 };
+
+let upgradesTimer = function upgradesTimer() {
+    if (upgrades.length > 0) {
+        if (Math.floor((upgrades[0][0] - gameTime) % 60) > 9)
+            upgradeTime.innerHTML = `${Math.floor((upgrades[0][0] - gameTime) / 60)}:${Math.floor((upgrades[0][0] - gameTime) % 60)}`;
+        else
+            upgradeTime.innerHTML = `${Math.floor((upgrades[0][0] - gameTime) / 60)}:0${Math.floor((upgrades[0][0] - gameTime) % 60)}`;
+        if (gameTime > upgrades[0][0]) {
+            eval(`${upgrades[0][1]} = ${upgrades[0][2]}`);
+            upgrades.splice(0, 1);
+        }
+    }
+    else
+        upgradeTime.innerHTML = '--:--';
+}
 
 let handleInput = function handleInput(dt) {
 
@@ -402,7 +413,7 @@ let handleInput = function handleInput(dt) {
         lastFire = Date.now();
     }
 
-    if (gameTime >= 120)
+    if (isRockets)
         if((input.isDown('SPACE') || true) &&
        		!isGameOver &&
         	Date.now() - lastFireRocket > rocketFrequency) {
@@ -480,7 +491,7 @@ let updateEntities = function updateEntities(dt) {
        	 	enemies[k].pos[1] = enemies[k].pos[1] - enemies[k].speed * dt;
        	}
 
-       	// add exhaust to armyUnit
+       	// add exhaust to armyUnits
        	if (!!enemies[k].exhaustPos) {
        		
        			enemies[k].exhaustPos.map(function (item, i) {
@@ -778,7 +789,7 @@ function renderExhaust(entity) {
 function gameOver() {
     document.getElementById('game-over').style.display = 'block';
     document.getElementById('game-over_reason').style.fontFamily = 'zorqueregular';
-    if (gameTime <= 240) { document.getElementById('game-over_reason').innerHTML = 'ALIENS WIN!'; }
+    if (gameTime <= 300) { document.getElementById('game-over_reason').innerHTML = 'ALIENS WIN!'; }
     else { document.getElementById('game-over_reason').innerHTML = 'HUMANITY WINS!'; }
     document.getElementById('game-over-overlay').style.display = 'block';
     isGameOver = true;
@@ -789,6 +800,7 @@ function reset() {
     document.getElementById('game-over').style.display = 'none';
     document.getElementById('game-over-overlay').style.display = 'none';
     isGameOver = false;
+    totalGold = 0;
     gameTime = 0;
     score = 0;
     player.hp = 100;
