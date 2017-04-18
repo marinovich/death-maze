@@ -9,8 +9,8 @@ let hpCtx = hp.getContext("2d");
 	hpCtx.rect(0, 0, hp.width, hp.height);  
 	hpCtx.stroke();
 
-let updateHP = function updateHP(hp) {
-	let hpPercent = hp/initPlayerHP || 100;
+let updateHP = function updateHP(allHP) {
+	let hpPercent = allHP/initPlayerHP*100 || 100;
 	
 	if (hpPercent > 100) {
 		hpPercent = 100;
