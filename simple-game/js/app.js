@@ -24,9 +24,6 @@ const defeatTime = document.getElementById("time-to-defeat");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-const hp = document.getElementById("hp");
-let hpCtx = hp.getContext("2d");
-
 let timeBlockHeight = 28;
 let armyWrapWidth = 70;
 let statusBarHeight = 40;
@@ -45,7 +42,7 @@ gameField.style.height = `${canvas.height + timeBlockHeight + statusBarHeight + 
 let armyUnit = [armyUnit1, armyUnit2, armyUnit3, armyUnit4];
 let selectedUnit = 0;
 armyUnit[selectedUnit].style.opacity = '1';
-let totalGold = 100;
+let totalGold = initGold;
 let goldMulti = 1;
 
 armyUnit.forEach((item,i) => item.onmouseover = () => (i !== selectedUnit) ? item.style.opacity = "0.5" : false);
@@ -68,48 +65,6 @@ document.onkeydown = function(e) {
     if (String.fromCharCode(e.keyCode || e.charCode) == 'X') { armyUnit[2].onclick(); }
     if (String.fromCharCode(e.keyCode || e.charCode) == 'Z') { armyUnit[3].onclick(); }
 };
-
-// hp bar
-// Black stroke
-	hpCtx.beginPath();
-	hpCtx.lineWidth = "4";
-	hpCtx.strokeStyle = "#0f0f0f";
-	hpCtx.rect(0, 0, hp.width, hp.height);  
-	hpCtx.stroke();
-
-let updateHP = function updateHP(percent) {
-	let hpPercent = percent || 100;
-	
-	if (hpPercent > 100) {
-		hpPercent = 100;
-	}
-	
-	if (hpPercent < 100 && hpPercent > 0) {
-
-		// Red rectangle
-	    hpCtx.beginPath();    
-	    hpCtx.lineWidth = "4";
-	    hpCtx.fillStyle = "red";
-	    hpCtx.fillRect(hp.width * hpPercent / 100, 2, hp.width - hp.width * hpPercent / 100 - 2, hp.height - 2);
-
-	    // Green rectangle
-	    hpCtx.beginPath();
-		hpCtx.lineWidth = "4";
-		hpCtx.fillStyle = "green";
-		hpCtx.fillRect(2, 2, hp.width * hpPercent / 100 - 2, hp.height - 2);
-	}
-
-	if (hpPercent === 100 || hpPercent === 0) {
-	    // Green rectangle
-	    hpCtx.beginPath();
-		hpCtx.lineWidth = "4";
-		if (hpPercent === 100)
-			hpCtx.fillStyle = "green";
-		else
-			hpCtx.fillStyle = "red";
-		hpCtx.fillRect(2, 2, hp.width - 4, hp.height - 2);
-	}
-}
 
 updateHP();
 
@@ -140,7 +95,8 @@ let count = 0;
 let goldCount = 0;
 let fps = 0;
 let a = document.getElementById("score");
-let totalTime = 300; // total time in seconds
+
+a.style.display = 'none'; // it's FPS
 
 // The main game loop
 let lastTime = Date.now();;
@@ -150,17 +106,16 @@ function main() {
 
     //calculate average fps (15 frames)
     fps += 1/dt;
-    if (count === 15) {
+    if (count === 20) {
     	fps = Math.floor(fps/15);
     	a.innerText = fps;
-    	count = 0;
     	fps = 0;
-    }
-    if (goldCount === 20) {
-        goldMulti = (5 - upgrades.length);
-    	totalGold += goldMulti;
-    	gold.innerHTML = totalGold;
-    	goldCount = 0;
+
+        goldMulti = (initUpgrades.length + 1 - upgrades.length);
+        totalGold += goldMulti*initGoldMulti;
+        gold.innerHTML = Math.round(totalGold);
+
+        count = 0;
     }
 
     update(dt);
@@ -169,7 +124,6 @@ function main() {
     lastTime = now;
     requestAnimFrame(main);
     count++;
-    goldCount++;
 };
 
 function init() {
@@ -198,7 +152,7 @@ resources.onReady(init);
 let player = {
     pos: [0, 0],
     sprite: new Sprite('img/6B.png', [0, 0], [85, 51]),
-    hp: 100
+    hp: initPlayerHP
 };
 
 let exhaustLeft = {
@@ -228,13 +182,7 @@ let scoreEl = document.getElementById('score');
 // Speed in pixels per second
 let playerSpeed = 300;
 let enemySpeed = 150;
-
-let upgrades = [
-    [50, 'bulletFrequency', 150],
-    [150, 'isRockets', true],
-    [220, 'rocketFrequency', 800],
-    [240, 'playerSpeed', 500]
-];
+let upgrades = initUpgrades.slice();
 
 let bulletSpeed = 500;
 let initBulletDamage = 1;
@@ -242,7 +190,7 @@ let bulletFrequency = 300;
 
 let isRockets = false;
 let rocketSpeed = 150;
-let initRocketDamage = 10;
+let rocketDamage = 10;
 let rocketFrequency = 1500;
 
 let moveAI = {};
@@ -251,6 +199,43 @@ let moveAI = {};
 	moveAI.right = false;
 	moveAI.left = false;
 	moveAI.target = [];
+
+// Reset game to original state
+function reset() {
+    document.getElementById('game-over').style.display = 'none';
+    document.getElementById('game-over-overlay').style.display = 'none';
+    gameField.style.visibility = 'visible';
+    isGameOver = false;
+    totalGold = initGold;
+    gameTime = 0;
+    score = 0;
+    player.hp = initPlayerHP;
+    updateHP();
+
+    enemies = [];
+    bullets = [];
+    rockets = [];
+
+    bulletSpeed = 500;
+    initBulletDamage = 1;
+    bulletFrequency = 300;
+    
+    isRockets = false;
+    rocketSpeed = 150;
+    rocketDamage = 10;
+    rocketFrequency = 1500;
+
+    upgrades = initUpgrades.slice();
+
+    player.pos = [canvas.width/2-20, canvas.height / matrixHeight+1];
+    exhaustLeft.pos = [player.pos[0], player.pos[1]-20];
+    exhaustRight.pos = [player.pos[0]+20, player.pos[1]-20];
+
+    for (let i = 0; i < matrixHeight; i++)
+        for (let j = 0; j < matrixWidth; j++)
+            matrix[i][j].freeTime = maxFreeTime;
+};
+
 // Update game objects
 function update(dt) {
     gameTime += dt;
@@ -422,11 +407,11 @@ let handleInput = function handleInput(dt) {
         	rockets.push({ pos: [x + player.sprite.size[0] / 2 - 40, y],
         	               dir: 'down',
         	               sprite: new Sprite('img/space-ship.png', [0, 70], [10, 25]),
-        	               damage: initRocketDamage });
+        	               damage: rocketDamage });
         	rockets.push({ pos: [x + player.sprite.size[0] / 2 + 30, y],
         	               dir: 'down',
         	               sprite: new Sprite('img/space-ship.png', [0, 70], [10, 25]),
-        	               damage: initRocketDamage });
+        	               damage: rocketDamage });
         	lastFireRocket = Date.now();
         }
 
@@ -793,39 +778,9 @@ function gameOver() {
     else { document.getElementById('game-over_reason').innerHTML = 'HUMANITY WINS!'; }
     document.getElementById('game-over-overlay').style.display = 'block';
     isGameOver = true;
-}
-
-// Reset game to original state
-function reset() {
-    document.getElementById('game-over').style.display = 'none';
-    document.getElementById('game-over-overlay').style.display = 'none';
-    isGameOver = false;
-    totalGold = 0;
-    gameTime = 0;
-    score = 0;
-    player.hp = 100;
-    updateHP();
+    gameField.style.visibility = 'hidden';
 
     for (let i = 0; i < matrixHeight; i++)
-    	for (let j = 0; j < matrixWidth; j++)
-    		matrix[i][j].freeTime = maxFreeTime;
-
-    enemies = [];
-    bullets = [];
-    rockets = [];
-
-    bulletSpeed = 500;
-    initBulletDamage = 1;
-    bulletFrequency = 300;
-
-    rocketSpeed = 150;
-    initRocketDamage = 10;
-    rocketFrequency = 1500;
-
-    player.pos = [canvas.width/2-20, canvas.height / matrixHeight+1];
-    exhaustLeft.pos = [player.pos[0], player.pos[1]-20];
-    exhaustRight.pos = [player.pos[0]+20, player.pos[1]-20];
-};
-
-
-
+        for (let j = 0; j < matrixWidth; j++)
+            matrix[i][j].freeTime = maxFreeTime;
+}

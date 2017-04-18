@@ -1,29 +1,44 @@
-// health points bar
-
-let hp = document.getElementById("hp");
+const hp = document.getElementById("hp");
 let hpCtx = hp.getContext("2d");
-let hpHeight = 30;
-let hpWidth = 500;
-let hpPersent = 10;
 
-// Red rectangle
-hpCtx.beginPath();
-hpCtx.lineWidth = "2";
-hpCtx.strokeStyle = "#000";
-hpCtx.rect(5, 5, hpWidth, hpHeight);  
-hpCtx.stroke();
+// hp bar
+// Black stroke
+	hpCtx.beginPath();
+	hpCtx.lineWidth = "4";
+	hpCtx.strokeStyle = "#0f0f0f";
+	hpCtx.rect(0, 0, hp.width, hp.height);  
+	hpCtx.stroke();
 
-// Green rectangle
-hpCtx.beginPath();
-hpCtx.lineWidth = "4";
-hpCtx.fillStyle = "green";
-hpCtx.fillRect(6, 6, hpWidth * hpPersent / 100 - 2, hpHeight - 2);
+let updateHP = function updateHP(percent) {
+	let hpPercent = percent || 100;
+	
+	if (hpPercent > 100) {
+		hpPercent = 100;
+	}
+	
+	if (hpPercent < 100 && hpPercent > 0) {
 
+		// Red rectangle
+	    hpCtx.beginPath();    
+	    hpCtx.lineWidth = "4";
+	    hpCtx.fillStyle = "red";
+	    hpCtx.fillRect(hp.width * hpPercent / 100, 2, hp.width - hp.width * hpPercent / 100 - 2, hp.height - 2);
 
-// Green rectangle
-if (hpPersent < 100) {
-    hpCtx.beginPath();    
-    hpCtx.lineWidth = "4";
-    hpCtx.fillStyle = "red";
-    hpCtx.fillRect(hpWidth * hpPersent / 100 + 4, 6, hpWidth - hpWidth * hpPersent / 100, hpHeight - 2);
+	    // Green rectangle
+	    hpCtx.beginPath();
+		hpCtx.lineWidth = "4";
+		hpCtx.fillStyle = "green";
+		hpCtx.fillRect(2, 2, hp.width * hpPercent / 100 - 2, hp.height - 2);
+	}
+
+	if (hpPercent === 100 || hpPercent === 0) {
+	    // Green rectangle
+	    hpCtx.beginPath();
+		hpCtx.lineWidth = "4";
+		if (hpPercent === 100)
+			hpCtx.fillStyle = "green";
+		else
+			hpCtx.fillStyle = "red";
+		hpCtx.fillRect(2, 2, hp.width - 4, hp.height - 2);
+	}
 }
