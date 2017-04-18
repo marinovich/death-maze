@@ -216,6 +216,8 @@ function reset() {
     bullets = [];
     rockets = [];
 
+    playerSpeed = 300;
+    
     bulletSpeed = 500;
     initBulletDamage = 1;
     bulletFrequency = 300;
