@@ -78,6 +78,7 @@ function Controls() {
 	document.addEventListener('mouseup', this.onMouseUp.bind(this), false);
 	document.addEventListener('wheel', this.onMouseWheel.bind(this), false);
 	display.addEventListener('click', lockPointer, false);
+    display.addEventListener('click', animateWeapon.bind(null, 0), false);
 	/*document.body.onclick = document.body.requestPointerLock ||
 	                        document.body.mozRequestPointerLock ||
 	                        document.body.webkitRequestPointerLock;*/
