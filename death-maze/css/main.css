@@ -1,0 +1,152 @@
+@font-face {
+    font-family: 'Zombnze';
+    src: url('../fonts/zombnze/zombnze.woff2') format('woff2'),
+         url('../fonts/zombnze/zombnze.woff') format('woff'),
+         url('../fonts/zombnze/zombnze.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+    font-family: 'Calibri', sans-serif;
+    color: #ddd;
+	width: 100%;
+	height: 100%;
+    overflow-x: hidden;
+    background-image: url('../img/background.jpg');
+    background-attachment: fixed;
+	/*background: #000;*/
+}
+
+.main__name {
+    font-family: 'Zombnze', sans-serif;
+    font-size: 100px;
+    line-height: 200px;
+    color: #eee;
+}
+
+.main__info {
+    padding: 0 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.main__start {
+    height:150px;
+    width: 300px;
+    font-size: 40px;
+}
+
+.main__controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main__controls .wrapper{
+    display: flex;
+    flex-direction: row;    
+}
+
+.controls__unit {
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 200px;
+    height: 200px;
+}
+
+.controls__unit:nth-of-type(1) {
+    background-image: url('../img/controls/wasd.png');
+}
+
+.controls__unit:nth-of-type(2) {
+    background-image: url('../img/controls/arrows.png');
+}
+
+.controls__unit:nth-of-type(3) {
+    background-image: url('../img/controls/mouse-click.png');
+}
+
+.controls__unit:nth-of-type(4) {
+    background-image: url('../img/controls/f9.png');
+}
+
+h2 {
+    text-align: center;
+}
+
+.controls__image {
+    width: 170px;
+    height: 170px;
+    /*background-color: #ddd;*/
+}
+
+.main__screenshots {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.main__screenshots .wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.main__screenshot {
+    width: 400px;
+    height: 250px;
+    background-color: #222;
+    border: 1px #ddd solid;
+}
+
+.game__display {
+    display: none;
+	width: 100%;
+	height: 100%;
+}
+
+.game__pause,
+.game__win,
+.game__die {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 30%;
+    width: 400px;
+    margin: 0 auto;
+    background-color: rgba(20,20,20,0.6);
+    border-radius: 5px;
+    color: #ddd;
+    font-size: 30px;
+}
+
+.main__game .wrapper {
+    width: 100%;
+    height: 100%;
+    padding: 30px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;    
+    
+}
+
+.show {
+    display: block;
+}
+
+.hide {
+    display: none;
+}

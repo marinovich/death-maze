@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<link rel="stylesheet" type="text/css" href="css/main.css">
+		<title>Death Maze</title>
+	</head>
+	<body>
+		<header class="header"></header>
+		<main class="main">
+			<section class="main__info" id="main__info">
+				<h1 class="main__name">DEATH MAZE</h1>
+				<button class="main__start" id="start_button">Start Game</button>
+				<section class="main__discription">
+					Welcome to the Death Maze! Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+				</section>
+				<section class="main__controls">
+					<h2 class="controls__caption">Controls</h2>
+					<div class="wrapper">
+						<div class="controls__unit"></div>
+						<div class="controls__unit"></div>
+						<div class="controls__unit"></div>
+						<div class="controls__unit"></div>
+					</div>
+					
+					<!--<figure class="controls__unit">
+						<div class="controls__image"></div>
+						<figcaption class="controls__discription">
+							Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam
+						</figcaption>
+					</figure>
+					<figure class="controls__unit">
+						<div class="controls__image"></div>
+						<figcaption class="controls__discription">
+							Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam
+						</figcaption>
+					</figure>
+					<figure class="controls__unit">
+						<div class="controls__image"></div>
+						<figcaption class="controls__discription">
+							Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam
+						</figcaption>
+					</figure>
+					<figure class="controls__unit">
+						<div class="controls__image"></div>
+						<figcaption class="controls__discription">
+							Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam
+						</figcaption>
+					</figure>-->
+				</section>
+				<a href="https://slides.com/itaman/death-maze" class="main__presentation">Presentation</a>
+				<section class="main__screenshots">
+					<h2>Screenshots</h2>
+					<div class="wrapper">
+						<div class="main__screenshot"></div>
+						<div class="main__screenshot"></div>
+					</div>
+					<div class="wrapper">
+						<div class="main__screenshot"></div>
+						<div class="main__screenshot"></div>
+					</div>
+					<div class="wrapper">
+						<div class="main__screenshot"></div>
+						<div class="main__screenshot"></div>
+					</div>
+				</section>
+				<section class="main__demo">
+					<h2>Demo</h2>
+					<iframe width="620" height="465" src="https://www.youtube.com/embed/RkhzDyPCDdo"></iframe>
+				</section>
+			</section>
+
+			<section class="main__game" id="main__game">
+				<canvas class="game__display" id="display" width="1" height="1"></canvas>
+                <section class="game__pause" id="pause_window">
+            		<div class="game__pause wrapper">
+            	    	<h3>GAME PAUSED</h3>
+            	    	<p>Click F9 to continue...</p>
+            	    </div>
+            	</section>
+            	<section class="game__win" id="win_window">
+            		<div class="game__win wrapper">
+            	    	<h3>YOU SURVIVE</h3>
+            	    	<p>But it's temporary...</p>
+            	    	<div class="game__buttons">
+    						<button class="game__button_restart">restart</button>
+            	    		<button class="game__button_menu">menu</button>
+            	    		<button class="game__button_next">next</button>        	    		
+            	    	</div>
+            	    </div>
+            	</section>
+            	<section class="game__die" id="die_window">
+            		<div class="game__die wrapper">
+            	    	<h3>There's no exit</h3>
+            	    	<p>You die and it's inevitably)</p>
+            	    	<div class="game__buttons">
+            	    		<button class="game__button_restart">restart</button>
+            	    		<button class="game__button_menu">menu</button>
+            	    	</div>
+            	    </div>
+            	</section>
+			</section>           
+		</main>
+		<footer class="footer"></footer>
+	</body>
+	<script type="text/javascript" src="js/levels.js"></script> 	
+	<script type="text/javascript" src="js/resources.js"></script>
+	<script type="text/javascript" src="js/sprite.js"></script>
+	<script type="text/javascript" src="js/game.js"></script>  
+	<script type="text/javascript" src="js/main.js"></script>  
+</html>
