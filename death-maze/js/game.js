@@ -1,4 +1,4 @@
-let snd = new Audio("sounds/shot.WAV"); // buffers automatically when created
+let snd = new Audio("sounds/shot.wav"); // buffers automatically when created
 let numOfStarts = 0;
 
 const CIRCLE = Math.PI * 2;
