@@ -686,7 +686,7 @@ resources.onReady(allowStartButton);
 
 function allowStartButton() {
     let startButton = document.getElementById('start_button');
-    startButton.disabled = false;
+    startButton.disabled = !startButton.disabled;
 }
 //resources.onReady(map.addExit.bind(map, mazeMap, mapSize));
 
