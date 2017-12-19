@@ -682,7 +682,12 @@ let FPSTime = 1;
 
 let isGameOver;
 
-//resources.onReady(map.addEnemies.bind(map, mazeMap, mapSize));
+resources.onReady(allowStartButton);
+
+function allowStartButton() {
+    let startButton = document.getElementById('start_button');
+    startButton.disabled = false;
+}
 //resources.onReady(map.addExit.bind(map, mazeMap, mapSize));
 
 function findPlayerPosition(mazeMap, mapSize) {
