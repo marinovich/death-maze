@@ -69,19 +69,15 @@ function Controls() {
 
     
 	document.addEventListener('keydown', this.onKey.bind(this, true), false);
-	document.addEventListener('keyup', this.onKey.bind(this, false), false);
-    if (numOfStarts === 0) {
-	   document.addEventListener('mousemove', this.onMouseMovement.bind(this), false);
-    }
+	document.addEventListener('keyup', this.onKey.bind(this, false), false);    
 	document.addEventListener('click', this.onMouseClick.bind(this), false);
 	document.addEventListener('mousedown', this.onMouseHold.bind(this), false);
 	document.addEventListener('mouseup', this.onMouseUp.bind(this), false);
 	document.addEventListener('wheel', this.onMouseWheel.bind(this), false);
 	display.addEventListener('click', lockPointer, false);
-    //display.addEventListener('click', animateWeapon.bind(null, 0), false);
-	/*document.body.onclick = document.body.requestPointerLock ||
-	                        document.body.mozRequestPointerLock ||
-	                        document.body.webkitRequestPointerLock;*/
+    if (numOfStarts === 0) {
+       document.addEventListener('mousemove', this.onMouseMovement.bind(this), false);
+    }
 }
 
 Controls.prototype.onKey = function(val, e) {
@@ -303,10 +299,10 @@ function Camera(canvas, resolution, focalLength) {
 	this.width = canvas.width = window.innerWidth * 0.5;
 	this.height = canvas.height = window.innerHeight * 0.5;
 	this.resolution = resolution;
-	this.spacing = this.width / resolution; //ширина колонки
-	this.focalLength = focalLength || 0.8; // параметр, влияющий на угол обзора колонки текстуры
-	this.range = 10;  // дальность видимости стен
-	this.lightRange = 4; //дальность подсветки стен
+	this.spacing = this.width / resolution; //column width
+	this.focalLength = focalLength || 1.2; 
+	this.range = 10;  // wall visibility range
+	this.lightRange = 4; // wall light range
 	this.scale = (this.width + this.height) / 1200;
 }
 
@@ -677,9 +673,7 @@ let controls;
 //controls = new Controls();
 let objects;
 let camera;
-//camera = new Camera(display, 50, 1.2);
 let loop;
-
 let timer;
 
 let FPSCount = 0;
@@ -706,7 +700,7 @@ function createMap(level) {
 
 	objects = new Objects();
 	controls = new Controls();
-	camera = new Camera(display, 320, 1.2);
+	camera = new Camera(display, 480, 1.2);
 	loop = new GameLoop();
 	timer = new Timer(levels[level].time);
 }
@@ -759,7 +753,6 @@ Camera.prototype.showFPS = function(seconds) {
 		showWindow(document.getElementById('die_window'));
 		pauseGame();
 		unlockPointer();
-		isGameOver = true;
 	}
 }
 
