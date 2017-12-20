@@ -185,7 +185,7 @@ function Map(size) {
 	this.size = size;
 	this.wallGrid = new Uint8Array(size * size);
 	this.skybox = new Bitmap('img/deathvalley_panorama.jpg', 2000, 750);
-	this.wallTexture = new Bitmap('img/wall_texture1.jpg', 680, 438);
+	this.wallTexture = new Bitmap('img/wall_texture4.jpg', 680, 438);
 	//this.wallTexture = new Bitmap('img/wall_texture3.jpg', 600, 400);
 	//this.wallTexture = new Bitmap('img/wall_texture.jpg', 1024, 1024);
 	this.light = 0;
@@ -666,7 +666,7 @@ resources.load([
     'img/wall_texture.jpg',
     'img/wall_texture1.jpg',
     'img/wall_texture2.jpg',
-    'img/wall_texture3.jpg',
+    'img/wall_texture4.jpg',
     'img/deathvalley_panorama.jpg',
     'img/pistol_arr.png',
     'img/zombie.png',
