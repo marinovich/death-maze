@@ -1,4 +1,8 @@
-let snd = new Audio("sounds/shot.wav"); // buffers automatically when created
+let snd = new Audio('sounds/shot.wav'); // buffers automatically when created
+let ambientSound = new Audio('sounds/ambient.mp3');
+ambientSound.loop = true;
+ambientSound.volume = 1;
+
 let numOfStarts = 0;
 
 const CIRCLE = Math.PI * 2;
@@ -729,6 +733,8 @@ function startGame(level) {
 	map.addExit(mazeMap, mapSize);
 
 	showGame();
+
+    ambientSound.play();
 	
 	timer.startTimer();	
 	map.generate();
