@@ -12,6 +12,10 @@
 	padding: 0;
 }
 
+a {
+    color: #ddd; 
+}
+
 body {
     font-family: 'Calibri', sans-serif;
     color: #ddd;
@@ -39,9 +43,32 @@ body {
 }
 
 .main__start {
+    font-family: 'Zombnze', sans-serif;
+    color: #ddd;
     height:150px;
     width: 300px;
-    font-size: 40px;
+    font-size: 60px;
+    background-color: #222;
+    border: none;
+    outline:none;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.main__start:hover {
+    background-color: #000;
+    color: #bbb;
+}
+
+.main__start:active {
+    background-color: #ccc;
+    color: #333;
+}
+
+.main__discription {
+    font-size: 18px;
+    max-width: 800px;
+    text-align: center;
 }
 
 .main__controls {
@@ -52,34 +79,40 @@ body {
 
 .main__controls .wrapper{
     display: flex;
-    flex-direction: row;    
+    flex-direction: row;
+    align-items: flex-end;
+    height: 200px;   
 }
 
 .controls__unit {
     background-repeat: no-repeat;
     background-size: contain;
-    width: 200px;
-    height: 200px;
+    height: 100%;
 }
 
 .controls__unit:nth-of-type(1) {
-    background-image: url('../img/controls/wasd.png');
+    min-width: 600px;
+    background-image: url('../img/controls/keyboard.png');
 }
 
 .controls__unit:nth-of-type(2) {
-    background-image: url('../img/controls/arrows.png');
+    width: 180px;
+    background-image: url('../img/controls/mouse.png');
 }
 
-.controls__unit:nth-of-type(3) {
+/*.controls__unit:nth-of-type(3) {
     background-image: url('../img/controls/mouse-click.png');
 }
 
 .controls__unit:nth-of-type(4) {
     background-image: url('../img/controls/f9.png');
-}
+}*/
 
 h2 {
     text-align: center;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    font-size: 40px;
 }
 
 .controls__image {
@@ -88,25 +121,37 @@ h2 {
     /*background-color: #ddd;*/
 }
 
-.main__screenshots {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
 .main__screenshots .wrapper {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    flex-wrap: wrap;
+    max-width: 1000px;
 }
 
 .main__screenshot {
     width: 400px;
     height: 250px;
-    background-color: #222;
-    border: 1px #ddd solid;
+    opacity: 0.95;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.main__screenshot:nth-of-type(1) {
+    background-image: url('../img/screenshots/screenshot_1.jpg');
+}
+
+.main__screenshot:nth-of-type(2) {
+    background-image: url('../img/screenshots/screenshot_2.jpg');
+}
+
+.main__screenshot:nth-of-type(3) {
+    background-image: url('../img/screenshots/screenshot_3.jpg');
+}
+
+.main__screenshot:nth-of-type(4) {
+    background-image: url('../img/screenshots/screenshot_4.jpg');
 }
 
 .game__display {
