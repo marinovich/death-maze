@@ -10,10 +10,16 @@
 * {
 	margin: 0;
 	padding: 0;
+    user-select: none;
 }
 
 a {
     color: #ddd; 
+}
+
+ul, 
+ol {
+    list-style-type: none;
 }
 
 body {
@@ -55,12 +61,12 @@ body {
     border-radius: 3px;
 }
 
-.main__start:hover {
+button:hover {
     background-color: #000;
     color: #bbb;
 }
 
-.main__start:active {
+button:active {
     background-color: #ccc;
     color: #333;
 }
@@ -162,7 +168,8 @@ h2 {
 
 .game__pause,
 .game__win,
-.game__die {
+.game__die,
+.game__settings {
     display: none;
     position: absolute;
     left: 0;
@@ -179,13 +186,42 @@ h2 {
 .main__game .wrapper {
     width: 100%;
     height: 100%;
-    padding: 30px;
+    padding: 30px 0;
     position: relative;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
     align-items: center;    
     
+}
+
+.game__settings_list li {
+    text-align: center;
+    width: 200px;
+}
+
+.game__settings_list li:hover,
+.selected-item {
+    box-shadow: 0 0 4px 4px #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.game__button_menu,
+.game__button_restart,
+.game__button_next,
+.game__button_close {
+    margin: 0 5px;
+    margin-top: 20px;
+    color: #ddd;
+    height:50px;
+    width: 100px;
+    font-size: 20px;
+    background-color: #222;
+    border: none;
+    outline:none;
+    cursor: pointer;
+    border-radius: 3px;
 }
 
 .show {

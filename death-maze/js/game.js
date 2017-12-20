@@ -145,13 +145,16 @@ Player.prototype.walk = function(distance, map, direction) {
 };
 
 Player.prototype.update = function(controls, map, seconds) {
-  if (controls.left && !controls.gamePaused) this.rotate(-Math.PI * seconds);
-  if (controls.right && !controls.gamePaused) this.rotate(Math.PI * seconds);
-  if (controls.forward && !controls.gamePaused) this.walk(1.0 * seconds, map, this.direction);
-  if (controls.backward && !controls.gamePaused) this.walk(-1.0 * seconds, map, this.direction);
-  if (controls.sideLeft && !controls.gamePaused) this.walk(1.0 * seconds, map, this.direction - Math.PI/2);
-  if (controls.sideRight && !controls.gamePaused) this.walk(-1.0 * seconds, map, this.direction - Math.PI/2);
-  if (controls.F9) pauseGame(true);    
+    if (controls.left && !controls.gamePaused) this.rotate(-Math.PI * seconds);
+    if (controls.right && !controls.gamePaused) this.rotate(Math.PI * seconds);
+    if (controls.forward && !controls.gamePaused) this.walk(1.0 * seconds, map, this.direction);
+    if (controls.backward && !controls.gamePaused) this.walk(-1.0 * seconds, map, this.direction);
+    if (controls.sideLeft && !controls.gamePaused) this.walk(1.0 * seconds, map, this.direction - Math.PI/2);
+    if (controls.sideRight && !controls.gamePaused) this.walk(-1.0 * seconds, map, this.direction - Math.PI/2);
+    if (controls.F9) {
+        pauseGame(true);  
+        unlockPointer();
+    }  
 };
 
 function pauseGame(isWindowShow) {
@@ -159,6 +162,7 @@ function pauseGame(isWindowShow) {
     controls.states.gamePaused = false;
     controls.states.F9 = false;
     timer.startTimer();
+    lockPointer();
   }
   else {
     controls.states.gamePaused = true;
@@ -178,7 +182,7 @@ function Map(size) {
 	this.wallGrid = new Uint8Array(size * size);
 	this.skybox = new Bitmap('img/deathvalley_panorama.jpg', 2000, 750);
 	this.wallTexture = new Bitmap('img/wall_texture1.jpg', 680, 438);
-	//this.wallTexture = new Bitmap('img/wall_texture3.jpeg', 800, 640);
+	//this.wallTexture = new Bitmap('img/wall_texture3.jpg', 600, 400);
 	//this.wallTexture = new Bitmap('img/wall_texture.jpg', 1024, 1024);
 	this.light = 0;
 	this.objects = [];
@@ -298,8 +302,8 @@ function Camera(canvas, resolution, focalLength) {
 	this.ctx = canvas.getContext('2d');
 	this.width = canvas.width = window.innerWidth * 0.5;
 	this.height = canvas.height = window.innerHeight * 0.5;
-	this.resolution = resolution;
-	this.spacing = this.width / resolution; //column width
+	this.resolution = resolution || 320;
+	this.spacing = this.width / this.resolution; //column width
 	this.focalLength = focalLength || 1.2; 
 	this.range = 10;  // wall visibility range
 	this.lightRange = 4; // wall light range
@@ -361,7 +365,7 @@ Camera.prototype.drawWeapon = function(weapon, paces) {
 };
 
 Camera.prototype.drawAim = function(aim) {
-	this.ctx.drawImage(aim.image, camera.width / 2, camera.height / 2, 15, 15);
+	this.ctx.drawImage(aim.image, camera.width / 2 - 15 / 2, camera.height / 2, 15, 15);
 }
 
 Camera.prototype.drawColumn = function(column, ray, angle, map) {
@@ -658,11 +662,15 @@ resources.load([
     'img/wall_texture.jpg',
     'img/wall_texture1.jpg',
     'img/wall_texture2.jpg',
+    'img/wall_texture3.jpg',
     'img/deathvalley_panorama.jpg',
     'img/pistol_arr.png',
     'img/zombie.png',
     'img/antidot.png'
 ]);
+
+let resolution = 240;
+let levelNum = 0;
 
 let mazeMap;
 let mapSize;
@@ -705,7 +713,7 @@ function createMap(level) {
 
 	objects = new Objects();
 	controls = new Controls();
-	camera = new Camera(display, 480, 1.2);
+	camera = new Camera(display, resolution, 1.2);
 	loop = new GameLoop();
 	timer = new Timer(levels[level].time);
 }

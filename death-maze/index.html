@@ -75,6 +75,9 @@
                 <section class="game__pause" id="pause_window">
             		<div class="game__pause wrapper">
             	    	<h3>GAME PAUSED</h3>
+                        <ul class="game__settings_list" id="settings">
+                            <li>Settings</li>
+                        </ul>
             	    	<p>Click F9 to continue...</p>
             	    </div>
             	</section>
@@ -99,6 +102,19 @@
             	    	</div>
             	    </div>
             	</section>
+                <section class="game__settings" id="settings_window">
+                    <div class="game__settings wrapper">
+                        <h3>Select resolution</h3>
+                        <ul class="game__settings_list" id="resolution">
+                            <li id="resolution_240">240</li>
+                            <li id="resolution_320">320</li>
+                            <li id="resolution_480">480</li>
+                            <li id="resolution_720">720</li>
+                            <li id="resolution_1080">1080</li>
+                        </ul>
+                        <button class="game__button_close" id="close_button">Close</button>
+                    </div>
+                </section>
 			</section>           
 		</main>
 		<footer class="footer"></footer>
