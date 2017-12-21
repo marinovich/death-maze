@@ -21,13 +21,14 @@ menuButton.map(button => button.addEventListener('click', showMenu, false));
 nextLeveltButton.map(button => button.addEventListener('click', gameEvent.bind(null, 'next'), false));
 document.getElementById('die_window').addEventListener('click', showWindow.bind(null, document.getElementById('die_window')));
 document.getElementById('win_window').addEventListener('click', showWindow.bind(null, document.getElementById('win_window')));
-document.getElementById('settings').addEventListener('click', showSettings, false);
+document.getElementById('pause_list').addEventListener('click', selectEvent, false);
 document.getElementById('resolution').addEventListener('click', changeResolution, false);
 
 function showMenu() {
 	document.getElementById('main__game').classList.toggle('show');
 	document.getElementById('display').classList.toggle('show');
 	document.getElementById('main__info').classList.toggle('hide');
+    ambientSound.pause();
 }
 
 function showGame() {
@@ -47,7 +48,22 @@ function gameEvent(event) {
     } 
 }
 
-function showSettings() {
+function selectEvent(event) {
+    switch(event.target) {
+        case document.getElementById('settings'): 
+            showSettings(); 
+            break;
+        case document.getElementById('return'): 
+            controls.states.F9 = true; 
+            break;
+        case document.getElementById('main-menu'): 
+            showWindow(document.getElementById('pause_window'));
+            showMenu(); 
+            break;
+    }
+}
+
+function showSettings(event) {
     showWindow(document.getElementById('pause_window'));
     showWindow(document.getElementById('settings_window'));
     showSelected('resolution');    

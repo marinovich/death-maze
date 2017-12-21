@@ -72,7 +72,7 @@ button:active {
 }
 
 .main__discription {
-    font-size: 18px;
+    font-size: 20px;
     max-width: 800px;
     text-align: center;
 }
@@ -198,6 +198,10 @@ h2 {
 .game__settings_list li {
     text-align: center;
     width: 200px;
+}
+
+.game__settings_list {
+    margin: 25px 0; 
 }
 
 .game__settings_list li:hover,

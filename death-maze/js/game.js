@@ -1,5 +1,7 @@
-let snd = new Audio('sounds/shot.wav'); // buffers automatically when created
+let shotSound = new Audio('sounds/shot.wav'); // buffers automatically when created
 let ambientSound = new Audio('sounds/ambient.mp3');
+let dieSound = new Audio('sounds/come-here.wav');
+let reloadSound = new Audio('sounds/reload.wav');
 ambientSound.loop = true;
 ambientSound.volume = 1;
 
@@ -68,8 +70,8 @@ function removeEvents() {
 
 function Controls() {
 	this.codes  = { 37: 'left', 39: 'right', 38: 'forward', 40: 'backward',
-	                65: 'sideLeft', 68: 'sideRight', 87: 'forward', 83: 'backward', 120: 'F9' };
-	this.states = { 'left': false, 'right': false, 'forward': false, 'backward': false, 'gamePaused': false };
+	                65: 'sideLeft', 68: 'sideRight', 87: 'forward', 83: 'backward', 120: 'F9', 82: 'reload' };
+	this.states = { 'left': false, 'right': false, 'forward': false, 'backward': false, 'gamePaused': false, 'weaponReload': false };
 
     
 	document.addEventListener('keydown', this.onKey.bind(this, true), false);
@@ -129,9 +131,14 @@ function Player(x, y, direction) {
 	this.y = y;
 	this.direction = direction;
 	this.weapon = {
+        currentBullet: 12,
+        totalBullet: 120,
 		pos: [0, 0],
-		sprite: new Sprite('img/pistol_arr.png', [0, 0], [130, 130], 80, [0, 1, 2], undefined, true, 1.7)
-	};
+		sprite: new Sprite('img/pistol_arr.png', [0, 0], [130, 130], 80, [0, 1, 2], undefined, true, 1.7),
+        needReload: false,
+        reloadSprite: new Sprite('img/pistol_reload.png', [0, 0], [130, 130], 80, 
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], undefined, false, 1.7)
+	};   
 	this.aim = new Bitmap('img/aim1.png', 512, 512);
 	this.paces = 0;
 }
@@ -155,6 +162,14 @@ Player.prototype.update = function(controls, map, seconds) {
     if (controls.backward && !controls.gamePaused) this.walk(-1.0 * seconds, map, this.direction);
     if (controls.sideLeft && !controls.gamePaused) this.walk(1.0 * seconds, map, this.direction - Math.PI/2);
     if (controls.sideRight && !controls.gamePaused) this.walk(-1.0 * seconds, map, this.direction - Math.PI/2);
+    if (controls.reload && !controls.gamePaused) {
+        this.weapon.needReload = true;
+        this.weapon.sprite._index = 0;
+        reloadSound.playbackRate = 0.5;
+        reloadSound.pause();
+        reloadSound.currentTime = 0;
+        reloadSound.play();
+    }
     if (controls.F9) {
         pauseGame(true);  
         unlockPointer();
@@ -362,7 +377,14 @@ Camera.prototype.drawWeapon = function(weapon, paces) {
 
 	this.ctx.save();
     this.ctx.translate(left, top);
-    weapon.sprite.render(this.ctx);
+    if (!weapon.needReload) {
+        weapon.sprite.render(this.ctx);
+        if (weapon.currentBullet <= 0 && weapon.sprite._index == 0) {
+            weapon.needReload = true;
+        }
+    }
+    else
+        weapon.reloadSprite.render(this.ctx);
     this.ctx.restore();
 
 	//this.ctx.drawImage(weapon.image, left, top, weapon.width * this.scale * 1.2, weapon.height * this.scale * 1.2);
@@ -502,6 +524,8 @@ Camera.prototype.drawSprites = function(player, map, columnProps) {
 	let hits = columnProps.map(obj => obj.hit);
 	if(Math.min.apply(null, sprites.filter(sprite => sprite.type === 'enemy')
 								   .map(sprite => sprite.distanceFromPlayer)) < 0.3) {
+        
+        
 		showWindow(document.getElementById('die_window'));
 		pauseGame();
 		unlockPointer();
@@ -509,6 +533,7 @@ Camera.prototype.drawSprites = function(player, map, columnProps) {
 	if(Math.min.apply(null, sprites.filter(sprite => sprite.type === 'enemy')
 								   .map(sprite => sprite.distanceFromPlayer)) < 1) {
 		timer.reduceTime(100);
+        dieSound.play();
 	}
 	if(Math.min.apply(null, sprites.map(sprite => sprite.distanceFromPlayer)) < 5) {		
 		this.ctx.save();
@@ -606,7 +631,7 @@ Camera.prototype.drawSpriteColumn = function(player, map, column, hit, sprites) 
 		let isInAim =  left > sprite.render.cameraXOffset - ( sprite.render.width / 3 ) 
 					&& left < sprite.render.cameraXOffset + ( sprite.render.width / 4 );
 
-		if (isInAim && angle == 0 && controls.mouseHold) {
+		if (isInAim && angle == 0 && controls.mouseHold && !player.weapon.needReload) {
 			map.deleteObject(sprite.x, sprite.y);
 			return;
 		}
@@ -663,12 +688,13 @@ resources.load([
     'img/aim1.png',
     'img/pistol.png',
     'img/katana.png',
-    'img/wall_texture.jpg',
-    'img/wall_texture1.jpg',
-    'img/wall_texture2.jpg',
+    //'img/wall_texture.jpg',
+    //'img/wall_texture1.jpg',
+    //'img/wall_texture2.jpg',
     'img/wall_texture4.jpg',
     'img/deathvalley_panorama.jpg',
     'img/pistol_arr.png',
+    'img/pistol_reload.png',
     'img/zombie.png',
     'img/antidot.png'
 ]);
@@ -744,16 +770,19 @@ function startGame(level) {
     }
 }
 
-function frame(seconds) {
-	if (!controls.states.gamePaused) {
-		map.update(seconds);		
-		camera.render(player, map);
-		camera.showFPS(seconds);
-	}
-	if (controls.mouseHold || player.weapon.sprite._index != 0) {
+function frame(seconds) {    
+    player.update(controls.states, map, seconds);
+    if ((controls.mouseHold || player.weapon.sprite._index !== 0) && !player.weapon.needReload) {
 		animateWeapon(seconds);
 	}
-	player.update(controls.states, map, seconds);
+    else if (player.weapon.needReload) {
+        animateWeaponReaload(seconds);
+    }
+    if (!controls.states.gamePaused) {
+        map.update(seconds);        
+        camera.render(player, map);
+        camera.showFPS(seconds);
+    }	
 }
 
 Camera.prototype.showFPS = function(seconds) {
@@ -764,10 +793,11 @@ Camera.prototype.showFPS = function(seconds) {
 		FPSTime = FPSSeconds;
 		FPSSeconds = 0;
 	}
-	this.ctx.fillStyle = "red";
-	this.ctx.font = "20px Arial";
+	this.ctx.fillStyle = '#2fd761';
+	this.ctx.font = '20px Calibri';
 	this.ctx.fillText(`${Math.round(1 / FPSTime * 20)}`, 10, 30);
 	this.ctx.fillText(timer.timeAsString, 70, 30);
+    this.ctx.fillText(`${player.weapon.currentBullet}/${player.weapon.totalBullet}`, 170, 30);
 	if (timer.time == 0) {
 		showWindow(document.getElementById('die_window'));
 		pauseGame();
@@ -775,14 +805,25 @@ Camera.prototype.showFPS = function(seconds) {
 	}
 }
 
-function animateWeapon(seconds) {
-	if (!player.weapon.sprite._index) {
-	  snd.pause();
-	  snd.currentTime = 0;
-	  snd.play();
+function animateWeapon(seconds) {    
+	if (player.weapon.sprite._index == 0) {
+        shotSound.pause();
+        shotSound.currentTime = 0;
+        shotSound.play();
+        player.weapon.currentBullet--;
 	}
-	player.weapon.sprite.update(seconds * 1000);
-	player.weapon.sprite.checkEnd();
+        player.weapon.sprite.update(seconds * 1000);
+        player.weapon.sprite.checkEnd();  
+
+}
+
+function animateWeaponReaload(seconds) {
+    player.weapon.reloadSprite.update(seconds * 1000);
+    if (player.weapon.reloadSprite.checkEnd()) {
+        player.weapon.totalBullet -= 12 - player.weapon.currentBullet;
+        player.weapon.currentBullet = 12;
+        player.weapon.needReload = false;
+    }
 }
 
 function enemyLogic(base) {

@@ -21,7 +21,7 @@
             if (!this.once) {
                 return false;
             }
-            if (this.once && this._index >= this.frames.length) {
+            if (this.once && this._index > this.frames.length) {
                 this._index = 0;
                 return true;
             }
