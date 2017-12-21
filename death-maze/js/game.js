@@ -132,7 +132,7 @@ function Player(x, y, direction) {
 	this.direction = direction;
 	this.weapon = {
         currentBullet: 12,
-        totalBullet: 120,
+        totalBullet: 20,
 		pos: [0, 0],
 		sprite: new Sprite('img/pistol_arr.png', [0, 0], [130, 130], 80, [0, 1, 2], undefined, true, 1.7),
         needReload: false,
@@ -162,7 +162,7 @@ Player.prototype.update = function(controls, map, seconds) {
     if (controls.backward && !controls.gamePaused) this.walk(-1.0 * seconds, map, this.direction);
     if (controls.sideLeft && !controls.gamePaused) this.walk(1.0 * seconds, map, this.direction - Math.PI/2);
     if (controls.sideRight && !controls.gamePaused) this.walk(-1.0 * seconds, map, this.direction - Math.PI/2);
-    if (controls.reload && !controls.gamePaused) {
+    if (controls.reload && !controls.gamePaused && (player.weapon.totalBullet || player.weapon.currentBullet)) {
         this.weapon.needReload = true;
         this.weapon.sprite._index = 0;
         reloadSound.playbackRate = 0.5;
@@ -380,7 +380,7 @@ Camera.prototype.drawWeapon = function(weapon, paces) {
     if (!weapon.needReload) {
         weapon.sprite.render(this.ctx);
         if (weapon.currentBullet <= 0 && weapon.sprite._index == 0) {
-            weapon.needReload = true;
+            weapon.needReload = true;            
         }
     }
     else
@@ -775,7 +775,7 @@ function frame(seconds) {
     if ((controls.mouseHold || player.weapon.sprite._index !== 0) && !player.weapon.needReload) {
 		animateWeapon(seconds);
 	}
-    else if (player.weapon.needReload) {
+    else if (player.weapon.needReload && (player.weapon.totalBullet || player.weapon.currentBullet)) {
         animateWeaponReaload(seconds);
     }
     if (!controls.states.gamePaused) {
@@ -820,8 +820,21 @@ function animateWeapon(seconds) {
 function animateWeaponReaload(seconds) {
     player.weapon.reloadSprite.update(seconds * 1000);
     if (player.weapon.reloadSprite.checkEnd()) {
-        player.weapon.totalBullet -= 12 - player.weapon.currentBullet;
-        player.weapon.currentBullet = 12;
+        let allBullets = player.weapon.totalBullet;
+        let currBullets = player.weapon.currentBullet;
+        if (allBullets >= 12) {
+            player.weapon.totalBullet -= 12 - player.weapon.currentBullet;
+            player.weapon.currentBullet = 12;
+        }
+        else if (allBullets < 12 && allBullets + currBullets < 12) {
+            player.weapon.currentBullet += player.weapon.totalBullet;
+            player.weapon.totalBullet = 0;
+        }
+        else if (allBullets < 12 && allBullets + currBullets >= 12) {
+            player.weapon.totalBullet -= 12 - player.weapon.currentBullet;
+            player.weapon.currentBullet = 12;
+        }
+        
         player.weapon.needReload = false;
     }
 }
