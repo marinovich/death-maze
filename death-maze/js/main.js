@@ -80,7 +80,8 @@ function showSelected(id) {
 }
 
 function changeResolution(event) {
-    camera.resolution = +event.target.id.match(/\d+/);
-    camera.spacing = camera.width / camera.resolution;
+    resolution = +event.target.id.match(/\d+/);
+    camera.resolution = resolution;
+    camera.spacing = camera.width / resolution;
     showSelected('resolution');
 }
