@@ -1,0 +1,24 @@
+{
+  "name": "death-maze",
+  "version": "1.0.0",
+  "description": "- Death Maze   * [Play game](https://marinovich.github.io/death-maze/)",
+  "private": true,
+  "dependencies": {
+    "webpack-cli": "^3.3.6",
+    "webpack": "^4.38.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marinovich/death-maze.git"
+  },
+  "author": "Alexander Marinovich",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marinovich/death-maze/issues"
+  },
+  "homepage": "https://github.com/marinovich/death-maze#readme"
+}
