@@ -1,0 +1,47 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "extends": "eslint:recommended",
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "rules": {
+    "indent": [
+      "error",
+      2,
+      { "SwitchCase": 1 }
+    ],
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "semi": [
+      "error",
+      "always"
+    ],
+    "prefer-const": [
+      "error",
+      {
+        "destructuring": "any",
+        "ignoreReadBeforeAssign": false
+      }
+    ],
+    "no-console": "off",
+    "no-var": "error",
+    "curly": "error",
+    "dot-notation": "error",
+    "eqeqeq": ["error", "always"],
+    "no-else-return": "error"
+  }
+}

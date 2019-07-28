@@ -1,4 +1,4 @@
-const levels = [
+export const levels = [
   {
     'mazeMap': [
       1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -60,5 +60,4 @@ const levels = [
     'time': 60,
     'mapSize': 7
   }
-
 ];
