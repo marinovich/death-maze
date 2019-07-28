@@ -4,6 +4,23 @@ import { Bitmap } from './components/Bitmap';
 import { Sprite } from './components/Sprite';
 import { levels } from './components/levels';
 
+import './css/main.css';
+
+import shot from './sounds/shot.wav';
+import ambient from './sounds/ambient.mp3';
+import danger from './sounds/come-here.wav';
+import reload from './sounds/reload.wav';
+
+import aim from './img/aim1.png';
+import pistol from './img/pistol.png';
+import katana from './img/katana.png';
+import wall from './img/wall_texture4.jpg';
+import panorama from './img/deathvalley_panorama.jpg';
+import pistols from './img/pistol_arr.png';
+import pistolReload from './img/pistol_reload.png';
+import zombie from './img/zombie.png';
+import antidot from './img/antidot.png';
+
 (function () {
   const resourceCache = {};
   const readyCallbacks = [];
@@ -67,10 +84,10 @@ import { levels } from './components/levels';
 })();
 
 
-const shotSound = new Audio('src/sounds/shot.wav');
-const ambientSound = new Audio('src/sounds/ambient.mp3');
-const dieSound = new Audio('src/sounds/come-here.wav');
-const reloadSound = new Audio('src/sounds/reload.wav');
+const shotSound = new Audio(shot);
+const ambientSound = new Audio(ambient);
+const dieSound = new Audio(danger);
+const reloadSound = new Audio(reload);
 
 ambientSound.loop = true;
 ambientSound.volume = 1;
@@ -218,12 +235,12 @@ function Player(x, y, direction) {
     currentBullet: 12,
     totalBullet: 20,
     pos: [0, 0],
-    sprite: new Sprite('src/img/pistol_arr.png', [0, 0], [130, 130], 80, [0, 1, 2], undefined, true, 1.7),
+    sprite: new Sprite(pistols, [0, 0], [130, 130], 80, [0, 1, 2], undefined, true, 1.7),
     needReload: false,
-    reloadSprite: new Sprite('src/img/pistol_reload.png', [0, 0], [130, 130], 80,
+    reloadSprite: new Sprite(pistolReload, [0, 0], [130, 130], 80,
       [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], undefined, false, 1.7)
   };
-  this.aim = new Bitmap('src/img/aim1.png', 512, 512);
+  this.aim = new Bitmap(aim, 512, 512);
   this.paces = 0;
 }
 
@@ -301,8 +318,8 @@ function showWindow(elem) {
 function Map(size) {
   this.size = size;
   this.wallGrid = new Uint8Array(size * size);
-  this.skyBox = new Bitmap('src/img/deathvalley_panorama.jpg', 2000, 750);
-  this.wallTexture = new Bitmap('src/img/wall_texture4.jpg', 680, 438);
+  this.skyBox = new Bitmap(panorama, 2000, 750);
+  this.wallTexture = new Bitmap(wall, 680, 438);
   //this.wallTexture = new Bitmap('img/wall_texture3.jpg', 600, 400);
   //this.wallTexture = new Bitmap('img/wall_texture.jpg', 1024, 1024);
   this.light = 0;
@@ -396,7 +413,7 @@ Map.prototype.update = function (seconds) {
 Map.prototype.addEnemies = function (enemiesMap, mapSize) {
   const animationArr = Array(33).fill(0).map((el, i) => i);
   const addEnemy = this.addObject.bind(this, {
-    texture: new Sprite('src/img/zombie.png', [0, 0], [415, 487], 500, animationArr, undefined, false, 1),
+    texture: new Sprite(zombie, [0, 0], [415, 487], 500, animationArr, undefined, false, 1),
     height: 0.6,
     width: 0.3,
     type: 'enemy',
@@ -412,7 +429,7 @@ Map.prototype.addEnemies = function (enemiesMap, mapSize) {
 
 Map.prototype.addExit = function (exitMap, mapSize) {
   const addExit = this.addObject.bind(this, {
-    texture: new Sprite('src/img/antidot.png', [0, 0], [500, 519]),
+    texture: new Sprite(antidot, [0, 0], [500, 519]),
     height: 0.6,
     width: .3,
     type: 'exit'
@@ -740,21 +757,18 @@ GameLoop.prototype.frame = function (time) {
 };
 
 window.resources.load([
-  'src/img/aim1.png',
-  'src/img/pistol.png',
-  'src/img/katana.png',
-  //'src/img/wall_texture.jpg',
-  //'src/img/wall_texture1.jpg',
-  //'src/img/wall_texture2.jpg',
-  'src/img/wall_texture4.jpg',
-  'src/img/deathvalley_panorama.jpg',
-  'src/img/pistol_arr.png',
-  'src/img/pistol_reload.png',
-  'src/img/zombie.png',
-  'src/img/antidot.png'
+  aim,
+  pistol,
+  katana,
+  wall,
+  panorama,
+  pistols,
+  pistolReload,
+  zombie,
+  antidot,
 ]);
 
-let resolution = 240;
+let resolution = 720;
 let levelNum = 0;
 
 let mazeMap;
