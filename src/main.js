@@ -1,4 +1,4 @@
-// Отстой пидорский 80е говно!
+// This game is like a game!
 import _ from 'lodash';
 
 import { Bitmap } from './components/Bitmap';
