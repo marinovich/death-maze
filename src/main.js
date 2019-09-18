@@ -1,3 +1,4 @@
+// Отстой пидорский 80е говно!
 import _ from 'lodash';
 
 import { Bitmap } from './components/Bitmap';
